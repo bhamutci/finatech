@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinaTech.EntityFramework.PostgresSqlServer;
 
-public class FinaTechPostgresSqlDbContext: FinaTechDbContextBase<FinaTechPostgresSqlDbContext>
+public sealed class FinaTechPostgresSqlDbContext: FinaTechDbContextBase<FinaTechPostgresSqlDbContext>
 {
     /// <summary>
     /// Represents the PostgreSQL-specific database context for FinaTech,
