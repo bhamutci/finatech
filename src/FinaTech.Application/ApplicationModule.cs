@@ -2,9 +2,10 @@ namespace FinaTech.Application;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PaymentService;
 using EntityFramework;
 using Mapper;
+using Services.Payment;
+using Services.Strategy;
 
 /// <summary>
 /// Provides extension methods for configuring application-specific services in the dependency injection container.
@@ -23,7 +24,7 @@ public static class ApplicationModule
         services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
         services.AddScoped<PaymentStrategy, SEPAPayment>();
         services.AddScoped<PaymentStrategy, SWIFTPayment>();
-        services.AddScoped<IPaymentService, PaymentService.PaymentService>();
+        services.AddScoped<IPaymentService, PaymentService>();
 
         return services;
     }

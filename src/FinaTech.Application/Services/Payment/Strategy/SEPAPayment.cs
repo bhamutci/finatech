@@ -1,6 +1,7 @@
-using FinaTech.Application.PaymentService.Dto;
+namespace FinaTech.Application.Services.Strategy;
 
-namespace FinaTech.Application.PaymentService;
+using Payment.Dto;
+
 
 public class SEPAPayment(PaymentDto payment) : PaymentStrategy(payment)
 {

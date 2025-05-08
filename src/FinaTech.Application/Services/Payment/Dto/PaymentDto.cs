@@ -1,4 +1,4 @@
-namespace FinaTech.Application.PaymentService.Dto;
+namespace FinaTech.Application.Services.Payment.Dto;
 
 /// <summary>
 /// Represents a Data Transfer Object (DTO) for a payment.

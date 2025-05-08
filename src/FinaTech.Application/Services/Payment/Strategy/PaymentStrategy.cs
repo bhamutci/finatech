@@ -1,9 +1,14 @@
-using FinaTech.Application.PaymentService.Dto;
+namespace FinaTech.Application.Services.Strategy;
 
-namespace FinaTech.Application.PaymentService;
+using Payment.Dto;
 
 public abstract class PaymentStrategy(PaymentDto payment)
 {
+    /// <summary>
+    /// Represents a data transfer object encapsulating payment details used in payment processing strategies.
+    /// This object carries information related to the payment transaction,
+    /// such as involved parties, the amount, currency, date, and other associated metadata.
+    /// </summary>
     protected PaymentDto paymentDto = payment;
 
     /// <summary>

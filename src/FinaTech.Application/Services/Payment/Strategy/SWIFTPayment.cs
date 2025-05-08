@@ -1,6 +1,6 @@
-using FinaTech.Application.PaymentService.Dto;
+namespace FinaTech.Application.Services.Strategy;
 
-namespace FinaTech.Application.PaymentService;
+using Payment.Dto;
 
 public class SWIFTPayment(PaymentDto payment) : PaymentStrategy(payment)
 {

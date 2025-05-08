@@ -1,4 +1,4 @@
-namespace FinaTech.Application.PaymentService;
+namespace FinaTech.Application.Services.Payment;
 
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
