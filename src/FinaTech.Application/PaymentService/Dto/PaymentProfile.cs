@@ -1,7 +1,6 @@
-using AutoMapper;
-using FinaTech.Core;
-
 namespace FinaTech.Application.PaymentService.Dto;
+using AutoMapper;
+using Core;
 
 public class PaymentProfile: Profile
 {
