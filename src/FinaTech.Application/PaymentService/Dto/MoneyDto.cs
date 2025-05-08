@@ -1,4 +1,4 @@
-namespace FinaTech.Application.Payment.Dto;
+namespace FinaTech.Application.PaymentService.Dto;
 
 public record MoneyDto(
     decimal Amount,

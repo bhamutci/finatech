@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FinaTech.EntityFramework")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+31cd9b85bc624c66dc5a21dd277f71c4ee2ce353")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2435f9a8ca7a5f69ad8e54db3959f3f93a07db4e")]
 [assembly: System.Reflection.AssemblyProductAttribute("FinaTech.EntityFramework")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FinaTech.EntityFramework")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

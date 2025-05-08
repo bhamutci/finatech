@@ -42,13 +42,13 @@ public sealed class Payment
     /// This property establishes a relationship to the <see cref="Account"/> entity,
     /// representing the sender's account in the transaction.
     /// </summary>
-    public required Account OriginatorAccount { get; set; }
+    public Account OriginatorAccount { get; set; }
 
     /// <summary>
     /// Gets or sets the beneficiary account associated with the payment.
     /// This represents the account that will receive the payment amount.
     /// </summary>
-    public required Account BeneficiaryAccount { get; set; }
+    public Account BeneficiaryAccount { get; set; }
 
     /// <summary>
     /// Gets or sets the charges bearer for the payment transaction.
@@ -72,4 +72,5 @@ public sealed class Payment
     /// </summary>
     [StringLength(PaymentConstants.MaxLengthOfReferenceNumber)]
     public string? ReferenceNumber { get; set; }
+
 }

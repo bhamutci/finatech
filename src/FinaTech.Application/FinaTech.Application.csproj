@@ -6,4 +6,14 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\FinaTech.Core\FinaTech.Core.csproj" />
+      <ProjectReference Include="..\FinaTech.EntityFramework\FinaTech.EntityFramework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="14.0.0" />
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    </ItemGroup>
+
 </Project>
