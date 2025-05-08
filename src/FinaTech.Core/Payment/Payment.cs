@@ -32,6 +32,12 @@ public sealed class Payment
     public required Money Amount { get; set; }
 
     /// <summary>
+    /// Gets or sets the date and time of the payment transaction.
+    /// This represents when the payment was initiated or processed.
+    /// </summary>
+    public required DateTimeOffset Date { get; set; }
+
+    /// <summary>
     /// Gets or sets the account of the originator associated with the payment.
     /// This property establishes a relationship to the <see cref="Account"/> entity,
     /// representing the sender's account in the transaction.
