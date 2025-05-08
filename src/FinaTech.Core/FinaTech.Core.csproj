@@ -21,4 +21,8 @@
       <None Remove="Bank\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Payment\" />
+    </ItemGroup>
+
 </Project>
