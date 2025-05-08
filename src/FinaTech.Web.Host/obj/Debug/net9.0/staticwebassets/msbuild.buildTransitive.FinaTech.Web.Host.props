@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/FinaTech.Web.Host.props" />
+</Project>
