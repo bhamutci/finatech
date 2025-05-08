@@ -7,18 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Account\**" />
-      <Compile Remove="Bank\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="Account\**" />
-      <EmbeddedResource Remove="Bank\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Account\**" />
-      <None Remove="Bank\**" />
+      <Compile Include="Account\Address.cs" />
+      <Compile Include="Bank\BankConstants.cs" />
     </ItemGroup>
 
     <ItemGroup>
