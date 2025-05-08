@@ -17,7 +17,7 @@ namespace FinaTech.EntityFramework;
 /// with the appropriate <see cref="DbContextOptions{TContext}"/> for PostgreSQL access.
 /// This class is needed to run "dotnet ef ..." commands from command line on development. Not used anywhere else
 /// </remarks>
-public class FinaTechPostgresSqlDbContextFactory: IDesignTimeDbContextFactory<FinaTechPostgresSqlDbContext>
+public sealed class FinaTechPostgresSqlDbContextFactory: IDesignTimeDbContextFactory<FinaTechPostgresSqlDbContext>
 {
     public FinaTechPostgresSqlDbContext CreateDbContext(string[] args)
     {
