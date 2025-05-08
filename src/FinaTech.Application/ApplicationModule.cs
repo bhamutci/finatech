@@ -1,3 +1,5 @@
+using FinaTech.Application.Mapper;
+
 namespace FinaTech.Application;
 
 using Microsoft.Extensions.Configuration;
@@ -19,7 +21,7 @@ public static class ApplicationModule
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddEntityFramework(configuration);
-
+        services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
         services.AddScoped<PaymentStrategy, SEPAPayment>();
         services.AddScoped<PaymentStrategy, SWIFTPayment>();
         services.AddScoped<IPaymentService, PaymentService.PaymentService>();

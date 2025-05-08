@@ -1,10 +1,17 @@
-namespace FinaTech.Application.PaymentService.Dto;
+namespace FinaTech.Application.Mapper;
+
 using AutoMapper;
+using PaymentService.Dto;
 using Core;
 
-public class PaymentProfile: Profile
+public class DtoAutoMapperProfile: Profile
 {
-    public PaymentProfile()
+    public DtoAutoMapperProfile()
+    {
+        PaymentProfile();
+    }
+
+    private void PaymentProfile()
     {
         CreateMap<Payment, PaymentDto>()
             .ForMember(member => member.ChargesBearer,
@@ -12,6 +19,6 @@ public class PaymentProfile: Profile
             .ReverseMap()
             .ForMember(member =>member.ChargesBearer,
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
-
     }
+
 }
