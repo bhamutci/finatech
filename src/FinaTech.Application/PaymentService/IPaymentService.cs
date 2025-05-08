@@ -1,6 +1,7 @@
-using FinaTech.Application.PaymentService.Dto;
-
 namespace FinaTech.Application.PaymentService;
+
+using Dto;
+
 
 /// <summary>
 /// Represents a service for managing payment operations.

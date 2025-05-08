@@ -1,4 +1,4 @@
-src/FinaTech.*/bin/**/*
+src/FinaTech.*/bin/
 src/FinaTech.*/obj/
 test/FinaTech.*/bin/
 test/FinaTech.Web.*/bin/

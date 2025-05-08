@@ -1,10 +1,10 @@
 namespace FinaTech.Application.PaymentService;
 
 using AutoMapper;
-using Dto;
+using Microsoft.EntityFrameworkCore;
 using EntityFramework.PostgresSqlServer;
 using Core;
-using Microsoft.EntityFrameworkCore;
+using Dto;
 
 /// <summary>
 /// Service for handling operations related to payments in the FinaTech application.
