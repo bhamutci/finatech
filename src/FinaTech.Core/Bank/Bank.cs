@@ -18,7 +18,7 @@ public sealed class Bank
     /// </summary>
     [Required]
     [StringLength(BankConstants.MaxLengthOfName)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// Gets or sets the Business Identifier Code (BIC) of the bank,
@@ -26,11 +26,11 @@ public sealed class Bank
     /// </summary>
     [Required]
     [StringLength(BankConstants.MaxLengthOfBIC)]
-    public string BIC { get; set; }
+    public required string BIC { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of accounts associated with the bank.
     /// </summary>
-    public ICollection<Account> Accounts { get; set; }
+    public ICollection<Account> Accounts { get; set; } = new List<Account>();
 
 }

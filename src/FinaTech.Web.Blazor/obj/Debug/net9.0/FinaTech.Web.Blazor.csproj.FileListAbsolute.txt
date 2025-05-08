@@ -157,3 +157,4 @@
 /Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Web.Blazor/obj/Debug/net9.0/FinaTech.Web.Blazor.pdb
 /Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Web.Blazor/obj/Debug/net9.0/FinaTech.Web.Blazor.genruntimeconfig.cache
 /Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Web.Blazor/obj/Debug/net9.0/ref/FinaTech.Web.Blazor.dll
+/Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Web.Blazor/obj/Debug/net9.0/FinaTech.Web.Blazor.sourcelink.json

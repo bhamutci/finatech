@@ -195,3 +195,4 @@
 /Users/bulenthamutci/Projects/git/finatech/test/FinaTech.Web.Tests/obj/Debug/net9.0/FinaTech.Web.Tests.pdb
 /Users/bulenthamutci/Projects/git/finatech/test/FinaTech.Web.Tests/obj/Debug/net9.0/FinaTech.Web.Tests.genruntimeconfig.cache
 /Users/bulenthamutci/Projects/git/finatech/test/FinaTech.Web.Tests/obj/Debug/net9.0/ref/FinaTech.Web.Tests.dll
+/Users/bulenthamutci/Projects/git/finatech/test/FinaTech.Web.Tests/obj/Debug/net9.0/FinaTech.Web.Tests.sourcelink.json

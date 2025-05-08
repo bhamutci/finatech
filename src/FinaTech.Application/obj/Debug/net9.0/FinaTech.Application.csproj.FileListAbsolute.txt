@@ -21,3 +21,4 @@
 /Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Application/obj/Debug/net9.0/refint/FinaTech.Application.dll
 /Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Application/obj/Debug/net9.0/FinaTech.Application.pdb
 /Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Application/obj/Debug/net9.0/ref/FinaTech.Application.dll
+/Users/bulenthamutci/Projects/git/finatech/src/FinaTech.Application/obj/Debug/net9.0/FinaTech.Application.sourcelink.json

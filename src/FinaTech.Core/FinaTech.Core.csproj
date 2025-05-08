@@ -5,14 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-
     <ItemGroup>
-      <Compile Include="Account\Address.cs" />
-      <Compile Include="Bank\BankConstants.cs" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Payment\" />
-    </ItemGroup>
-
 </Project>

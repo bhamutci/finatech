@@ -23,7 +23,7 @@ public sealed class Address
     /// </summary>
     [Required]
     [StringLength(AddressConstants.MaxLengthOfAddressLine1)]
-    public string AddressLine1 { get; set; }
+    public required string AddressLine1 { get; set; }
 
     /// <summary>
     /// Gets or sets the secondary address line, typically used for additional location details such as apartment or suite numbers.
@@ -61,5 +61,5 @@ public sealed class Address
     /// </summary>
     [Required]
     [StringLength(AddressConstants.MaxLengthOfCountryCode)]
-    public string CountryCode { get; set; }
+    public required string CountryCode { get; set; }
 }

@@ -28,13 +28,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\FinaTech.Web.Blazor.vdfk4ynq92.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-HTmTEdusyezanoxO6Hq9ojyI99cqZLlzFfttETf9pxw="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"5780"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022HTmTEdusyezanoxO6Hq9ojyI99cqZLlzFfttETf9pxw=\u0022"},{"Name":"Last-Modified","Value":"Thu, 08 May 2025 12:16:55 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"5780"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022HTmTEdusyezanoxO6Hq9ojyI99cqZLlzFfttETf9pxw=\u0022"},{"Name":"Last-Modified","Value":"Thu, 08 May 2025 13:52:20 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/FinaTech.Web.Blazor/FinaTech.Web.Blazor.vdfk4ynq92.bundle.scp.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\FinaTech.Web.Blazor.vdfk4ynq92.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"vdfk4ynq92"},{"Name":"integrity","Value":"sha256-HTmTEdusyezanoxO6Hq9ojyI99cqZLlzFfttETf9pxw="},{"Name":"label","Value":"_content/FinaTech.Web.Blazor/FinaTech.Web.Blazor.bundle.scp.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"5780"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022HTmTEdusyezanoxO6Hq9ojyI99cqZLlzFfttETf9pxw=\u0022"},{"Name":"Last-Modified","Value":"Thu, 08 May 2025 12:16:55 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"5780"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022HTmTEdusyezanoxO6Hq9ojyI99cqZLlzFfttETf9pxw=\u0022"},{"Name":"Last-Modified","Value":"Thu, 08 May 2025 13:52:20 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/FinaTech.Web.Blazor/lib/bootstrap/dist/css/bootstrap-grid.bqjiyaj88i.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\lib\bootstrap\dist\css\bootstrap-grid.css'))</AssetFile>
