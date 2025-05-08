@@ -1,11 +1,10 @@
-using FinaTech.Application.Mapper;
-
 namespace FinaTech.Application;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PaymentService;
 using EntityFramework;
+using Mapper;
 
 /// <summary>
 /// Provides extension methods for configuring application-specific services in the dependency injection container.
