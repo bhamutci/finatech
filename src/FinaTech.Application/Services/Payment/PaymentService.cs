@@ -9,34 +9,15 @@ using Dto;
 /// <summary>
 /// Service for handling operations related to payments in the FinaTech application.
 /// </summary>
-public class PaymentService : IPaymentService
+public class PaymentService : BaseApplicationService, IPaymentService
 {
-    #region Fields
-
-    /// <summary>
-    /// Represents the database context used for interacting with the application's database.
-    /// Provides access to database entities such as Payments.
-    /// </summary>
-    private readonly FinaTechPostgresSqlDbContext dbContext;
-
-    /// <summary>
-    /// Provides object-object mapping functionality within the payment service,
-    /// allowing transformations between domain models and DTOs.
-    /// </summary>
-    private readonly IMapper mapper;
-
-    #endregion
-
     #region Constructors
 
     /// <summary>
     /// Service for handling operations related to payments in the FinaTech application.
     /// </summary>
-    public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper)
-    {
-        this.dbContext = dbContext;
-        this.mapper = mapper;
-    }
+    public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper): base(dbContext, mapper)
+    {}
 
     #endregion
 
@@ -54,6 +35,16 @@ public class PaymentService : IPaymentService
     }
 
     /// <summary>
+    /// Retrieves a list of all payments.
+    /// </summary>
+    /// <returns>A read-only list of <see cref="PaymentDto"/> objects representing payments.</returns>
+    public async Task<IReadOnlyList<PaymentDto>> GetPaymentsAsync()
+    {
+        IReadOnlyList<Payment> payments = await dbContext.Payments.ToListAsync();
+        return mapper.Map<IReadOnlyList<Payment>, IReadOnlyList<PaymentDto>>(payments);
+    }
+
+    /// <summary>
     /// Asynchronously creates a new payment in the system and returns the created payment details.
     /// </summary>
     /// <param name="payment">The payment details to be created, encapsulated in a <see cref="PaymentDto"/> object.</param>
@@ -65,16 +56,6 @@ public class PaymentService : IPaymentService
         await dbContext.SaveChangesAsync();
 
         return mapper.Map<Payment, PaymentDto>(paymentEntity);
-    }
-
-    /// <summary>
-    /// Retrieves a list of all payments.
-    /// </summary>
-    /// <returns>A read-only list of <see cref="PaymentDto"/> objects representing payments.</returns>
-    public async Task<IReadOnlyList<PaymentDto>> GetPaymentsAsync()
-    {
-        IReadOnlyList<Payment> payments = await dbContext.Payments.ToListAsync();
-        return mapper.Map<IReadOnlyList<Payment>, IReadOnlyList<PaymentDto>>(payments);
     }
 
     #endregion

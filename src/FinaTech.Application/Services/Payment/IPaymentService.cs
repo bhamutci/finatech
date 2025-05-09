@@ -16,15 +16,15 @@ public interface IPaymentService
     Task<PaymentDto> GetPaymentAsync(int id);
 
     /// <summary>
+    /// Asynchronously retrieves a collection of payments.
+    /// </summary>
+    /// <returns>A read-only list of <see cref="PaymentDto"/> objects representing the payments.</returns>
+    Task<IReadOnlyList<PaymentDto>> GetPaymentsAsync();
+
+    /// <summary>
     /// Asynchronously creates a new payment.
     /// </summary>
     /// <param name="payment">The <see cref="PaymentDto"/> object containing the details of the payment to create.</param>
     /// <returns>A <see cref="PaymentDto"/> object representing the newly created payment.</returns>
     Task<PaymentDto> CreatePaymentAsync(PaymentDto payment);
-
-    /// <summary>
-    /// Asynchronously retrieves a collection of payments.
-    /// </summary>
-    /// <returns>A read-only list of <see cref="PaymentDto"/> objects representing the payments.</returns>
-    Task<IReadOnlyList<PaymentDto>> GetPaymentsAsync();
 }
