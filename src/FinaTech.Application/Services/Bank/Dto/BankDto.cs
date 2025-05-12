@@ -1,6 +1,7 @@
-using FinaTech.Core;
-
 namespace FinaTech.Application.Services.Bank.Dto;
+
+using FinaTech.Application.Services.Account.Dto;
+
 
 /// <summary>
 /// Represents the data transfer object for a bank, containing essential bank information.
@@ -8,5 +9,5 @@ namespace FinaTech.Application.Services.Bank.Dto;
 public record BankDto(int Id,
     string Name,
     string BIC,
-    ICollection<Account> Accounts)
+    ICollection<AccountDto> Accounts)
 { }

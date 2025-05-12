@@ -79,8 +79,6 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
       account.HasKey(a => a.Id);
       account.HasIndex(a => a.Name);
       account.HasIndex(a => a.AccountNumber);
-      account.HasIndex(a => a.Bic);
-      account.HasIndex(a => a.AccountNumber);
 
       account.HasOne(a => a.Address)
         .WithMany()

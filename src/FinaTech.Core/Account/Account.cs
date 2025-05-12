@@ -46,21 +46,15 @@ public sealed class Account
     public required string Iban { get; set; }
 
     /// <summary>
-    /// Gets or sets the Business Identifier Code (BIC) associated with the account.
-    /// </summary>
-    [StringLength(AccountConstants.MaxLengthOfBic)]
-    public required string Bic { get; set; }
-
-    /// <summary>
     /// Gets or sets the address associated with the account entity.
     /// </summary>
-    public required Address Address { get; set; }
+    public Address? Address { get; set; }
 
     /// <summary>
     /// Represents a financial institution associated with an account,
     /// detailing properties such as the bank's name and BIC.
     /// </summary>
-    public required Bank Bank { get; set; }
+    public Bank? Bank { get; set; }
 
 }
 
