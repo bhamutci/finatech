@@ -12,7 +12,7 @@ public class ListResultDto<T>: IListResult<T>
     /// <summary>
     /// Creates a new <see cref="ListResultDto{T}"/> object.
     /// </summary>
-    public ListResultDto()
+    protected ListResultDto()
     {
 
     }
@@ -21,7 +21,7 @@ public class ListResultDto<T>: IListResult<T>
     /// Creates a new <see cref="ListResultDto{T}"/> object.
     /// </summary>
     /// <param name="items">List of items</param>
-    public ListResultDto(IReadOnlyList<T> items)
+    protected ListResultDto(IReadOnlyList<T> items)
     {
         Items = items;
     }

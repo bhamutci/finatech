@@ -79,7 +79,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
 
         try
         {
-            IQueryable<Payment> paymentQuery = GetPaymentsQuery(paymentFilter);
+            IQueryable<Payment> paymentQuery = GetPaymentsQuery(paymentFilter, cancellationToken);
 
             int totalCount = await paymentQuery.CountAsync(cancellationToken);
 
@@ -133,7 +133,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
             logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentDto.Id);
             return paymentDto;
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException)
         {
             logger.LogWarning("CreatePaymentAsync for ReferenceNumber {ReferenceNumber} was cancelled.", payment?.ReferenceNumber);
             throw;
@@ -143,7 +143,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
             logger.LogWarning(argEx, "Payment creation failed due to invalid input: {Message}", argEx.Message);
             throw;
         }
-        catch (PaymentException argEx)
+        catch (PaymentException)
         {
              throw;
         }
@@ -176,7 +176,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
             return mapper.Map<Payment, PaymentDto>(paymentEntity);
 
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException)
         {
             logger.LogWarning("SavePaymentAsync for ReferenceNumber {ReferenceNumber} was cancelled.", payment?.ReferenceNumber);
             throw;
@@ -209,8 +209,10 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// </summary>
     /// <param name="paymentFilter">The filter object containing criteria such as keywords, beneficiary account ID, or originator account ID.</param>
     /// <returns>A queryable collection of payments filtered based on the criteria specified within the paymentFilter.</returns>
-    private IQueryable<Payment> GetPaymentsQuery(PaymentFilter paymentFilter)
+    private IQueryable<Payment> GetPaymentsQuery(PaymentFilter paymentFilter, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         logger.LogDebug("Building payment query with filter: {Filter}", paymentFilter);
 
         var payments = dbContext.Payments
@@ -276,12 +278,6 @@ public class PaymentService : BaseApplicationService, IPaymentService
         {
             logger.LogWarning("Validation failed: Payment details cannot be null or empty.");
             throw new ArgumentNullException(nameof(payment.Details), "Payment details cannot be null or empty.");
-        }
-
-        if (payment.Id != null && payment.Id != 0)
-        {
-            logger.LogWarning("Validation failed: Payment details cannot be null or empty.");
-           throw new ArgumentException("Payment ID cannot be specified when creating a new payment.", nameof(payment.Id));
         }
 
         logger.LogDebug("Payment validation completed successfully.");
