@@ -33,17 +33,13 @@ public class BankService : BaseApplicationService, IBankService
     #region Public Methods
 
     /// <summary>
-    /// Asynchronously retrieves information about a specific bank by its unique identifier.
+    /// Retrieves detailed information about a bank identified by its unique ID.
     /// </summary>
     /// <param name="id">The unique identifier of the bank to retrieve.</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a <see cref="BankDto"/>
-    /// representing the bank information, mapped from the database entity.
-    /// </returns>
-    /// <exception cref="PaymentException">
-    /// Thrown if a database error occurs or an unexpected error takes place while retrieving the bank information.
-    /// </exception>
+    /// <param name="cancellationToken">A token to monitor for request cancellation.</param>
+    /// <returns>A <see cref="BankDto"/> containing the bank's details.</returns>
+    /// <exception cref="BankException">Thrown if the bank cannot be retrieved due to a database error
+    /// or an unexpected issue.</exception>
     public async Task<BankDto> GetBankAsync(int id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve bank with ID: {BankId}", id);
@@ -67,13 +63,13 @@ public class BankService : BaseApplicationService, IBankService
         catch (DbException dbEx) // Catch specific database exceptions
         {
             logger.LogError(dbEx, "Database error while retrieving bank with ID: {BankId}", id); // Log database error
-            throw new PaymentException($"Could not retrieve bank with ID {id} due to a database error.",
+            throw new BankException($"Could not retrieve bank with ID {id} due to a database error.",
                 dbEx); // Throw custom exception
         }
         catch (Exception ex) // Catch any other unexpected errors
         {
             logger.LogError(ex, "An unexpected error occurred while retrieving bank with ID: {BankId}", id);
-            throw new PaymentException($"An unexpected error occurred while retrieving bank with ID {id}.", ex);
+            throw new BankException($"An unexpected error occurred while retrieving bank with ID {id}.", ex);
         }
     }
 
@@ -90,7 +86,7 @@ public class BankService : BaseApplicationService, IBankService
 
         try
         {
-            IQueryable<Core.Bank> bankQuery = GetBanksQuery(bankFilter, cancellationToken);
+            IQueryable<Core.Bank> bankQuery = GetBankQuery(bankFilter, cancellationToken);
 
             int totalCount = await bankQuery.CountAsync(cancellationToken);
 
@@ -143,7 +139,7 @@ public class BankService : BaseApplicationService, IBankService
     {
         try
         {
-            await ValidateBankAsync(bank, cancellationToken);
+            ValidateBankAsync(bank, cancellationToken);
 
             var bankDto = await SaveBankAsync(bank, cancellationToken);
 
@@ -239,7 +235,7 @@ public class BankService : BaseApplicationService, IBankService
     /// </summary>
     /// <param name="bankFilter">The filter containing criteria to apply when querying banks.</param>
     /// <returns>An <see cref="IQueryable{T}"/> representing the filtered banks query.</returns>
-    private IQueryable<Core.Bank> GetBanksQuery(BankFilter bankFilter, CancellationToken cancellationToken)
+    private IQueryable<Core.Bank> GetBankQuery(BankFilter bankFilter, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -268,18 +264,16 @@ public class BankService : BaseApplicationService, IBankService
     }
 
     /// <summary>
-    /// Validates the provided bank details, ensuring all required fields are specified and valid.
+    /// Validates the provided bank details, ensuring required fields are populated and valid.
     /// </summary>
-    /// <param name="bank">The bank object containing the details to be validated.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when the bank object or any required property is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when the bank ID is incorrectly specified.</exception>
-    private Task ValidateBankAsync(BankDto bank, CancellationToken cancellationToken)
+    /// <param name="bank">The BankDto object containing the bank's information.</param>
+    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
+    /// <exception cref="ArgumentNullException">Thrown when required bank details, such as the bank itself, name, or BIC, are null or empty.</exception>
+    private void ValidateBankAsync(BankDto bank, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        logger.LogInformation("Starting validation for payment: {Name}", bank?.Name);
+        logger.LogInformation("Starting validation for bank: {Name}", bank?.Name);
 
         if (bank == null)
         {
@@ -300,7 +294,7 @@ public class BankService : BaseApplicationService, IBankService
         }
 
         logger.LogDebug("Bank validation completed successfully.");
-        return Task.CompletedTask;
+
     }
 
     #endregion

@@ -126,7 +126,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     {
         try
         {
-            await ValidatePaymentAsync(payment, cancellationToken);
+            ValidatePaymentAsync(payment, cancellationToken);
 
             var paymentDto = await SavePaymentAsync(payment, cancellationToken);
 
@@ -246,17 +246,12 @@ public class PaymentService : BaseApplicationService, IPaymentService
     }
 
     /// <summary>
-    /// Validates the specified payment details to ensure all required fields are correctly populated.
+    /// Validates the provided payment details to ensure they meet the required criteria.
     /// </summary>
-    /// <param name="payment">The payment details to validate.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when the payment, payment reference number, or payment details are null or empty.
-    /// </exception>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the payment ID is specified in a new payment.
-    /// </exception>
-    private Task ValidatePaymentAsync(PaymentDto payment, CancellationToken cancellationToken)
+    /// <param name="payment">The payment data to be validated.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the payment or any required property of the payment is null or empty.</exception>
+    private void ValidatePaymentAsync(PaymentDto payment, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -281,7 +276,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         }
 
         logger.LogDebug("Payment validation completed successfully.");
-        return Task.CompletedTask;
+
     }
 
     #endregion
