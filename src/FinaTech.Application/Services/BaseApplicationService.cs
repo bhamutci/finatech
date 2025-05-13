@@ -1,5 +1,6 @@
 namespace FinaTech.Application.Services;
 
+using Microsoft.Extensions.Logging;
 using AutoMapper;
 using EntityFramework.PostgresSqlServer;
 
@@ -19,6 +20,12 @@ public abstract class BaseApplicationService
     /// </summary>
     protected readonly IMapper mapper;
 
+    /// <summary>
+    /// Provides logging functionality for the application service,
+    /// enabling the capture of detailed diagnostic and operational information.
+    /// </summary>
+    protected readonly ILogger<BaseApplicationService> logger;
+
     #endregion
 
     #region Constructors
@@ -28,7 +35,7 @@ public abstract class BaseApplicationService
     /// This class provides shared functionality and dependencies required for services
     /// interacting with the database and performing object mapping.
     /// </summary>
-    protected BaseApplicationService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper)
+    protected BaseApplicationService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<BaseApplicationService> logger)
     {}
 
     #endregion

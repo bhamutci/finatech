@@ -1,7 +1,8 @@
 namespace FinaTech.Application.Services.Bank;
 
-using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using EntityFramework.PostgresSqlServer;
 
 using Dto;
@@ -15,7 +16,7 @@ public class BankService : BaseApplicationService, IBankService
     /// Provides functionalities for managing banks, including retrieving, creating,
     /// and handling related operations within the banking domain.
     /// </summary>
-    public BankService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public BankService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, Logger<BankService> logger) : base(dbContext, mapper, logger)
     {}
 
     /// <summary>
