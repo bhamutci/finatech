@@ -151,9 +151,72 @@ public class AccountServiceTests
             ClassicAssert.AreEqual(expectedDtosInPage[i].Id, result.Items[i].Id);
             // Add more assertions to compare other properties if needed
             ClassicAssert.AreEqual(expectedDtosInPage[i].Name, result.Items[i].Name);
-            // etc.
         }
 
+    }
+
+    [Test]
+    public async Task GetAccountsAsync_ShouldApplyKeywordFilter()
+    {
+        var totalNumberOfAccounts = 10;
+        var sampleAccounts = GetSampleAccounts(totalNumberOfAccounts);
+
+        // Modify some accounts to include a specific keyword in Name or AddressLine1
+        sampleAccounts[0].Name = "Special Account NYC";
+        sampleAccounts[3].Address.AddressLine1 = "123 Special Lane";
+        sampleAccounts[5].Iban = "SPECIALIBAN123"; // Add filter for Iban too
+        sampleAccounts[7].AccountNumber = "SPECIALACC456"; // Add filter for AccountNumber
+        sampleAccounts[9].Address.City = "SpecialCity"; // Add filter for City
+        sampleAccounts[1].Address.CountryCode = "SP"; // Add filter for CountryCode
+
+
+        _dbContext.Accounts.AddRange(sampleAccounts);
+        await _dbContext.SaveChangesAsync();
+
+        var keyword = "Special";
+        var skipCount = 0;
+        var maxResultCount = 10;
+
+        // Expected count after filtering
+        var expectedFilteredEntities = sampleAccounts.Where(a =>
+            (a.Name != null && a.Name.Contains(keyword)) ||
+            (a.Iban != null && a.Iban.Contains(keyword)) || // Include Iban filter
+            (a.AccountNumber != null && a.AccountNumber.Contains(keyword)) || // Include AccountNumber filter
+            (a.Address != null && a.Address.AddressLine1 != null &&
+             a.Address.AddressLine1.Contains(keyword)) || // Include Address filters
+            (a.Address != null && a.Address.AddressLine2 != null && a.Address.AddressLine2.Contains(keyword)) ||
+            (a.Address != null && a.Address.AddressLine3 != null && a.Address.AddressLine3.Contains(keyword)) ||
+            (a.Address != null && a.Address.City != null && a.Address.City.Contains(keyword)) ||
+            (a.Address != null && a.Address.PostCode != null && a.Address.PostCode.Contains(keyword)) ||
+            (a.Address != null && a.Address.CountryCode != null && a.Address.CountryCode.Contains(keyword))
+        ).ToList();
+        var expectedFilteredCount = expectedFilteredEntities.Count;
+
+
+        // Create the filter with the keyword
+        var accountFilter = new AccountFilter
+        {
+            Keywords = keyword,
+            SkipCount = skipCount,
+            MaxResultCount = maxResultCount,
+        };
+
+        CancellationToken cancellationToken = CancellationToken.None;
+        var result = await _accountService.GetAccountsAsync(accountFilter, cancellationToken);
+
+        // Assert: Verify the outcome
+        ClassicAssert.NotNull(result);
+        ClassicAssert.NotNull(result.Items);
+
+        // Total count should match the number of items that match the filter *before* pagination
+        ClassicAssert.AreEqual(expectedFilteredCount, result.TotalCount);
+        // Item count should match the number of items in the page (up to MaxResultCount)
+        ClassicAssert.AreEqual(expectedFilteredCount, result.Items.Count); // Assuming MaxResultCount is large enough
+
+        // Verify the IDs of the returned items match the expected filtered entities
+        var expectedFilteredIds = expectedFilteredEntities.Select(a => a.Id).ToList();
+        var actualFilteredIds = result.Items.Select(dto => dto.Id).ToList();
+        CollectionAssert.AreEquivalent(expectedFilteredIds, actualFilteredIds);
     }
 
     [TearDown]
