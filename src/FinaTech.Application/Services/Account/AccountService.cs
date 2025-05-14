@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace FinaTech.Application.Services.Account;
 
 using System.Data.Common;
@@ -170,7 +168,7 @@ public class AccountService: BaseApplicationService, IAccountService
         catch (Exception ex)
         {
             logger.LogError(ex, "An unexpected error occurred while creating an account. Name: {Name}", account?.Name);
-            throw new BankException("An unexpected error occurred while creating the account.", ex);
+            throw new AccountException("An unexpected error occurred while creating the account.", ex);
         }
     }
 

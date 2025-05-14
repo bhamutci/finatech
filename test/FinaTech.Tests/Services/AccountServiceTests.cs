@@ -22,8 +22,6 @@ public class AccountServiceTests
     private ILogger<AccountService> _mockLogger;
     private AccountService _accountService;
 
-
-
     [SetUp]
     public void Setup()
     {
@@ -243,6 +241,62 @@ public class AccountServiceTests
         ClassicAssert.AreEqual(0, result.TotalCount);
         // Item count should be 0
         ClassicAssert.AreEqual(0, result.Items.Count);
+    }
+
+    [Test]
+    public async Task CreateAccountAsync_ShouldCreateAccount_WhenValidAccountDto()
+    {
+        var validAccountDto = new CreateAccountDto(
+            Id: 0,
+            BankId: 1,
+            AddressId: 0,
+            Name: "New Test Account",
+            AccountNumber: "98765",
+            Iban: "NL99FINA9876543210",
+            Address: new AddressDto(0, "New Address Line 1", null, null, "Amsterdam", "1000AA",
+                "NL")
+        );
+        var cancellationToken = CancellationToken.None;
+
+        var createdAccountDto = await _accountService.CreateAccountAsync(validAccountDto, cancellationToken);
+
+        ClassicAssert.NotNull(createdAccountDto);
+
+        ClassicAssert.That(createdAccountDto.Id, Is.GreaterThan(0));
+
+        ClassicAssert.AreEqual(validAccountDto.Name, createdAccountDto.Name);
+        ClassicAssert.AreEqual(validAccountDto.Iban, createdAccountDto.Iban);
+
+        var accountInDb = await _dbContext.Accounts.FindAsync([createdAccountDto.Id], cancellationToken);
+        ClassicAssert.NotNull(accountInDb);
+        ClassicAssert.AreEqual(validAccountDto.Name, accountInDb.Name);
+    }
+
+
+    [Test]
+    public async Task CreateAccountAsync_ShouldThrowArgumentException_WhenAccountDtoIsInvalid()
+    {
+        // Arrange: Create an invalid AccountDto (e.g., missing required Name)
+        var invalidAccountDto = new CreateAccountDto(
+            Id: 0,
+            BankId: 1,
+            AddressId: 0,
+            Name: null,
+            AccountNumber: "98765",
+            Iban: "NL99FINA9876543210",
+            Address: new AddressDto(0, "New Address Line 1", null, null, "Amsterdam", "1000AA", "NL")
+        );
+
+        var cancellationToken = CancellationToken.None;
+
+        var thrownException = ClassicAssert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _accountService.CreateAccountAsync(invalidAccountDto, cancellationToken)
+        );
+
+        ClassicAssert.That(thrownException.Message, Contains.Substring("Account name cannot be null or empty"));
+
+        var accountCountAfter = await _dbContext.Accounts.CountAsync(cancellationToken: cancellationToken);
+        ClassicAssert.AreEqual(0, accountCountAfter);
     }
 
     [TearDown]
