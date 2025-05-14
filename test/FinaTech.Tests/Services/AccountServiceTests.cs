@@ -1,12 +1,9 @@
-using FinaTech.Application.Services.Bank.Dto;
-
 namespace FinaTech.Tests.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 
-using Moq;
 using AutoMapper;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -15,8 +12,7 @@ using Application.Mapper;
 using EntityFramework.PostgresSqlServer;
 using FinaTech.Application.Services.Account;
 using FinaTech.Application.Services.Account.Dto;
-
-
+using FinaTech.Application.Services.Bank.Dto;
 
 [TestFixture]
 public class AccountServiceTests
@@ -25,6 +21,7 @@ public class AccountServiceTests
     private IMapper _mapper;
     private ILogger<AccountService> _mockLogger;
     private AccountService _accountService;
+
 
 
     [SetUp]
@@ -219,13 +216,41 @@ public class AccountServiceTests
         CollectionAssert.AreEquivalent(expectedFilteredIds, actualFilteredIds);
     }
 
+    [Test]
+    public async Task GetAccountsAsync_ShouldReturnEmptyList_WhenNoAccountsMatchFilter()
+    {
+        var totalNumberOfAccounts = 10;
+        var sampleAccounts = GetSampleAccounts(totalNumberOfAccounts);
+        _dbContext.Accounts.AddRange(sampleAccounts);
+        await _dbContext.SaveChangesAsync();
+
+        // Create a filter that won't match any data
+        var accountFilter = new AccountFilter
+        {
+            Keywords = "NonExistentKeyword", // Use a keyword that doesn't exist
+            SkipCount = 0,
+            MaxResultCount = 10,
+        };
+
+        CancellationToken cancellationToken = CancellationToken.None;
+        var result = await _accountService.GetAccountsAsync(accountFilter, cancellationToken);
+
+        // Assert: Verify the outcome
+        ClassicAssert.NotNull(result);
+        ClassicAssert.NotNull(result.Items);
+
+        // Total count should be 0
+        ClassicAssert.AreEqual(0, result.TotalCount);
+        // Item count should be 0
+        ClassicAssert.AreEqual(0, result.Items.Count);
+    }
+
     [TearDown]
     public void TearDown()
     {
         _dbContext.Dispose();
     }
 
-    // Helper to create sample Account entities
     private List<Core.Account> GetSampleAccounts(int count)
     {
         var accounts = new List<Core.Account>();
