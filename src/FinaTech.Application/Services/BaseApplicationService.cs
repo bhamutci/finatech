@@ -35,8 +35,13 @@ public abstract class BaseApplicationService
     /// This class provides shared functionality and dependencies required for services
     /// interacting with the database and performing object mapping.
     /// </summary>
-    protected BaseApplicationService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<BaseApplicationService> logger)
-    {}
+    protected BaseApplicationService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper,
+        ILogger<BaseApplicationService> logger)
+    {
+        this.dbContext = dbContext;
+        this.mapper = mapper;
+        this.logger = logger;
+    }
 
     #endregion
 }

@@ -8,6 +8,5 @@ using FinaTech.Application.Services.Account.Dto;
 /// </summary>
 public record BankDto(int Id,
     string Name,
-    string BIC,
-    ICollection<AccountDto> Accounts)
+    string BIC)
 { }

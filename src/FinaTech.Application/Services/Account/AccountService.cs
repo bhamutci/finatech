@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace FinaTech.Application.Services.Account;
 
 using System.Data.Common;
@@ -20,7 +22,7 @@ public class AccountService: BaseApplicationService, IAccountService
     /// Provides functionalities for managing banks, including retrieving, creating,
     /// and handling related operations within the banking domain.
     /// </summary>
-    public AccountService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, Logger<AccountService> logger) : base(
+    public AccountService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<AccountService> logger) : base(
         dbContext, mapper, logger)
     {
     }
@@ -89,14 +91,16 @@ public class AccountService: BaseApplicationService, IAccountService
         {
             IQueryable<Core.Account> accountQuery = GetAccountQuery(accountFilter, cancellationToken);
 
-            int totalCount = await accountQuery.CountAsync(cancellationToken);
-
-            List<Core.Account> accounts = await accountQuery.Skip(accountFilter.SkipCount)
+            List<Core.Account> accounts = await accountQuery
+                .Skip(accountFilter.SkipCount)
                 .Take(accountFilter.MaxResultCount)
                 .ToListAsync(cancellationToken);
 
+            int totalCount = await accountQuery.CountAsync(cancellationToken);
+
+
             IReadOnlyList<AccountDto> AccountDtos =
-                mapper.Map<IReadOnlyList<Core.Account>, IReadOnlyList<AccountDto>>(accounts);
+                mapper.Map<List<Core.Account>, IReadOnlyList<AccountDto>>(accounts);
 
             var pagedResultDto = new PagedResultDto<AccountDto>
             {
@@ -104,8 +108,8 @@ public class AccountService: BaseApplicationService, IAccountService
                 TotalCount = totalCount
             };
 
-            logger.LogInformation("Retrieved {BankCount} accounts out of {TotalCount} total accounts.",
-                AccountDtos.Count, totalCount);
+            logger.LogInformation("Retrieved {AccountCount} accounts out of {TotalCount} total accounts.",
+                AccountDtos?.Count, totalCount);
 
             return pagedResultDto;
         }
@@ -137,7 +141,7 @@ public class AccountService: BaseApplicationService, IAccountService
     /// <exception cref="AccountException">Thrown when a domain-specific account error is encountered.</exception>
     /// <exception cref="ArgumentException">Thrown when invalid arguments are passed for account creation.</exception>
     /// <exception cref="OperationCanceledException">Thrown when the operation is canceled through the provided cancellation token.</exception>
-    public async Task<AccountDto> CreateAccountAsync(AccountDto account, CancellationToken cancellationToken)
+    public async Task<AccountDto> CreateAccountAsync(CreateAccountDto account, CancellationToken cancellationToken)
     {
         try
         {
@@ -180,19 +184,21 @@ public class AccountService: BaseApplicationService, IAccountService
     /// </summary>
     /// <param name="account">The account information to be saved, encapsulated in an <see cref="AccountDto"/> object.</param>
     /// <param name="cancellationToken">The token used to propagate notification that the operation should be canceled.</param>
-    /// <returns>An <see cref="AccountDto"/> representing the saved account with updated data from the database.</returns>
+    /// <returns>An <see cref="CreateAccountDto"/> representing the saved account with updated data from the database.</returns>
     /// <exception cref="BankAlreadyExistsException">Thrown when the account conflicts with an existing bank entity.</exception>
     /// <exception cref="AccountException">Thrown when any unforeseen issue prevents the account from being saved successfully.</exception>
-    private async Task<AccountDto> SaveAccountAsync(AccountDto account, CancellationToken cancellationToken)
+    private async Task<AccountDto> SaveAccountAsync(CreateAccountDto account, CancellationToken cancellationToken)
     {
         logger.LogDebug("Mapping AccountDto to Account entity for saving.");
         try
         {
-            Core.Account accountEntity = mapper.Map<AccountDto, Core.Account>(account);
+            Core.Account accountEntity = mapper.Map<CreateAccountDto, Core.Account>(account);
 
             await dbContext.Accounts.AddAsync(accountEntity, cancellationToken);
 
             await dbContext.SaveChangesAsync(cancellationToken);
+
+            await dbContext.Accounts.Entry(accountEntity).ReloadAsync(cancellationToken);
 
             return mapper.Map<Core.Account, AccountDto>(accountEntity);
 
@@ -248,6 +254,7 @@ public class AccountService: BaseApplicationService, IAccountService
 
         var accounts = dbContext.Accounts
             .Include(p => p.Bank)
+            .Include(p=>p.Address)
             .AsQueryable();
 
         if (accountFilter != null)
@@ -284,7 +291,7 @@ public class AccountService: BaseApplicationService, IAccountService
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the bank object or any required property is null.</exception>
     /// <exception cref="ArgumentException">Thrown when the bank ID is incorrectly specified.</exception>
-    private void ValidateBankAsync(AccountDto account, CancellationToken cancellationToken)
+    private void ValidateBankAsync(CreateAccountDto account, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -314,10 +321,10 @@ public class AccountService: BaseApplicationService, IAccountService
             throw new ArgumentNullException(nameof(account.Address), "Account Address cannot be null or empty.");
         }
 
-        if (string.IsNullOrEmpty(account.Address.Country))
+        if (string.IsNullOrEmpty(account.Address.CountryCode))
         {
             logger.LogWarning("Validation failed: Account Address Country cannot be null or empty.");
-            throw new ArgumentNullException(nameof(account.Address.Country), "Account Address Country cannot be null or empty.");
+            throw new ArgumentNullException(nameof(account.Address.CountryCode), "Account Address Country cannot be null or empty.");
         }
 
         logger.LogDebug("Account  validation completed successfully.");

@@ -30,11 +30,11 @@ public interface IAccountService
     /// <summary>
     /// Creates a new account with the provided details.
     /// </summary>
-    /// <param name="account">The account details to create, represented as an <see cref="AccountDto"/>.</param>
+    /// <param name="account">The account details to create, represented as an <see cref="CreateAccountDto"/>.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the operation to complete.</param>
     /// <returns>
     /// A task representing the asynchronous operation.
-    /// The task result contains the created <see cref="AccountDto"/> with the account details.
+    /// The task result contains the created <see cref="CreateAccountDto"/> with the account details.
     /// </returns>
-    Task<AccountDto> CreateAccountAsync(AccountDto account, CancellationToken cancellationToken);
+    Task<AccountDto> CreateAccountAsync(CreateAccountDto account, CancellationToken cancellationToken);
 }

@@ -1,11 +1,11 @@
-using FinaTech.Application.Services.Account.Dto;
-using FinaTech.Application.Services.Bank.Dto;
-
 namespace FinaTech.Application.Mapper;
 
 using AutoMapper;
+
 using Core;
 using Services.Payment.Dto;
+using Services.Account.Dto;
+using Services.Bank.Dto;
 
 public class DtoAutoMapperProfile: Profile
 {
@@ -17,9 +17,10 @@ public class DtoAutoMapperProfile: Profile
     public DtoAutoMapperProfile()
     {
         AddressProfile();
-        AccountProfile();
-        PaymentProfile();
         BankProfile();
+        AccountProfile();
+        MoneyProfile();
+        PaymentProfile();
     }
 
     /// <summary>
@@ -29,7 +30,10 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void AddressProfile()
     {
-        CreateMap<Address, AddressDto>().ReverseMap();
+        CreateMap<Address, AddressDto>()
+            .MaxDepth(1)
+            .ReverseMap()
+            .MaxDepth(1);
     }
 
     /// <summary>
@@ -39,7 +43,13 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void AccountProfile()
     {
-        CreateMap<Account, AccountDto>().ReverseMap();
+        CreateMap<Account, AccountDto>()
+            .MaxDepth(1)
+            .ReverseMap()
+            .MaxDepth(1);
+
+        CreateMap<CreateAccountDto, Account>()
+            .MaxDepth(1);
     }
 
     /// <summary>
@@ -49,7 +59,10 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void MoneyProfile()
     {
-        CreateMap<Money, MoneyDto>().ReverseMap();
+        CreateMap<Money, MoneyDto>()
+            .MaxDepth(1)
+            .ReverseMap()
+            .MaxDepth(1);
     }
 
     /// <summary>
@@ -59,9 +72,11 @@ public class DtoAutoMapperProfile: Profile
     private void PaymentProfile()
     {
         CreateMap<Payment, PaymentDto>()
+            .MaxDepth(1)
             .ForMember(member => member.ChargesBearer,
                 opt => opt.MapFrom(p => (ChargesBearer) p.ChargesBearer))
             .ReverseMap()
+            .MaxDepth(1)
             .ForMember(member =>member.ChargesBearer,
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
     }
@@ -74,8 +89,10 @@ public class DtoAutoMapperProfile: Profile
     private void BankProfile()
     {
         CreateMap<Bank, BankDto>()
+            .MaxDepth(1)
             .AfterMap(MapAccountDto)
-            .ReverseMap();
+            .ReverseMap()
+            .MaxDepth(1);
     }
 
     /// <summary>
@@ -87,9 +104,9 @@ public class DtoAutoMapperProfile: Profile
     /// <param name="bankDto">The destination data transfer object to which account data is mapped.</param>
     private void MapAccountDto(Bank bank, BankDto bankDto)
     {
-        foreach (var account in bankDto.Accounts)
+        /*foreach (var account in bankDto.Accounts)
         {
             bankDto.Accounts.Add(account);
-        }
+        }*/
     }
 }
