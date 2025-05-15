@@ -118,7 +118,7 @@ public class PaymentServiceTests
         ClassicAssert.NotNull(resultDto);
         ClassicAssert.AreEqual(paymentId, resultDto.Id);
         ClassicAssert.AreEqual(samplePayment.ReferenceNumber, resultDto.ReferenceNumber);
-        ClassicAssert.AreEqual(samplePayment.Amount.Amount, resultDto.Amount.Amount);
+        ClassicAssert.AreEqual(samplePayment.Amount.Value, resultDto.Amount.Value);
         ClassicAssert.AreEqual(samplePayment.Amount.Currency, resultDto.Amount.Currency);
     }
 

@@ -96,7 +96,7 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
       payment.Property(p => p.Details);
       payment.OwnsOne(p => p.Amount, amount =>
       {
-        amount.Property(a => a.Amount)
+        amount.Property(a => a.Value)
           .IsRequired();
         amount.Property(a => a.Currency)
           .HasMaxLength(PaymentConstants.MaxLengthOfCurrency)

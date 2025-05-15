@@ -1,5 +1,5 @@
 namespace FinaTech.Application.Services.Payment.Dto;
 
 public record MoneyDto(
-    decimal Amount,
+    decimal Value,
     string Currency);

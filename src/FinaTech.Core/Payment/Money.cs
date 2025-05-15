@@ -4,5 +4,5 @@ namespace FinaTech.Core;
 
 [ComplexType]
 public record Money(
-    decimal Amount,
+    decimal Value,
     string Currency);

@@ -25,7 +25,7 @@ public interface IAccountService
     /// A task representing the asynchronous operation.
     /// The task result contains a <see cref="PagedResultDto{AccountDto}"/> with the list of accounts and total count.
     /// </returns>
-    Task<PagedResultDto<AccountDto>> GetAccountsAsync(AccountFilter accountFilter, CancellationToken cancellationToken);
+    Task<PagedResultDto<AccountDto>> GetAccountsAsync(AccountFilter? accountFilter, CancellationToken cancellationToken);
 
     /// <summary>
     /// Creates a new account with the provided details.

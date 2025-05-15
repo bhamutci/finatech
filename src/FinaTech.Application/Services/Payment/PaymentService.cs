@@ -33,14 +33,15 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// Retrieves a payment based on the provided ID.
     /// </summary>
     /// <param name="id">The unique identifier of the payment to be retrieved.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="PaymentDto"/> representing the details of the payment, or null if no payment is found.</returns>
-    public async Task<PaymentDto> GetPaymentAsync(int id, CancellationToken cancellationToken)
+    public async Task<PaymentDto?> GetPaymentAsync(int id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve payment with ID: {PaymentId}", id);
 
         try
         {
-            var payment = await dbContext.Payments.FindAsync([id], cancellationToken: cancellationToken);;
+            var payment = await dbContext.Payments.FindAsync([id], cancellationToken: cancellationToken);
 
             if (payment == null)
             {
@@ -72,21 +73,26 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// Retrieves a list of all payments.
     /// </summary>
     /// <returns>A read-only list of <see cref="PaymentDto"/> objects representing payments.</returns>
-    public async Task<PagedResultDto<PaymentDto>> GetPaymentsAsync(PaymentFilter paymentFilter, CancellationToken cancellationToken)
+    public async Task<PagedResultDto<PaymentDto>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve payments with filter: Keywords='{Keywords}', BeneficiaryAccountId='{BeneficiaryAccountId}', OriginatorAccountId='{OriginatorAccountId}', Skip={Skip}, Take={Take}",
             paymentFilter?.Keywords, paymentFilter?.BeneficiaryAccountId, paymentFilter?.OriginatorAccountId, paymentFilter?.SkipCount, paymentFilter?.MaxResultCount);
 
         try
         {
-            IQueryable<Payment> paymentQuery = GetPaymentsQuery(paymentFilter, cancellationToken);
+            ArgumentNullException.ThrowIfNull(paymentFilter);
 
-            int totalCount = await paymentQuery.CountAsync(cancellationToken);
+            var paymentQuery = GetPaymentsQuery(paymentFilter, cancellationToken);
 
-            List<Payment> payments = await paymentQuery.Skip(paymentFilter.SkipCount).Take(paymentFilter.MaxResultCount)
+            var totalCount = await paymentQuery.CountAsync(cancellationToken);
+
+            var payments = await paymentQuery
+                .Skip(paymentFilter.SkipCount)
+                .Take(paymentFilter.MaxResultCount)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            IReadOnlyList<PaymentDto> paymentDtos =
+            var paymentDtos =
                 mapper.Map<IReadOnlyList<Payment>, IReadOnlyList<PaymentDto>>(payments);
 
             var pagedResultDto = new PagedResultDto<PaymentDto>
@@ -124,16 +130,11 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A <see cref="PaymentDto"/> object representing the created payment.</returns>
     /// <exception cref="PaymentException">Thrown when there is an issue creating the payment.</exception>
-    public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
+    public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto? payment, CancellationToken cancellationToken)
     {
         try
         {
-            ValidatePayment(payment, cancellationToken);
-
-            var paymentDto = await SavePaymentAsync(payment, cancellationToken);
-
-            logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentDto.Id);
-            return paymentDto;
+            return await SavePaymentAsync(payment, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -161,69 +162,40 @@ public class PaymentService : BaseApplicationService, IPaymentService
     #region Private Methods
 
     /// <summary>
-    /// Asynchronously saves a payment transaction to the database.
+    /// Saves a payment asynchronously to the database and returns the saved payment details.
     /// </summary>
-    /// <param name="payment">The payment data to be saved, represented as a <see cref="CreatePaymentDto"/> object.</param>
-    /// <param name="cancellationToken">
-    /// A token used to monitor for cancellation requests, allowing the operation to be canceled if necessary.
-    /// </param>
-    /// <returns>
-    /// A task representing the asynchronous operation. The result contains the information about the saved payment represented as a <see cref="PaymentDto"/> object.
-    /// </returns>
-    /// <exception cref="PaymentAlreadyExistsException">
-    /// Thrown when a payment with the same unique identifier already exists in the database.
-    /// </exception>
-    /// <exception cref="PaymentException">
-    /// Thrown when an unexpected error occurs while processing or saving the payment.
-    /// </exception>
-    private async Task<PaymentDto> SavePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
+    /// <param name="payment">The payment data transfer object containing the details of the payment to be saved.</param>
+    /// <param name="cancellationToken">The cancellation token to observe for request cancellation.</param>
+    /// <returns>A task representing the asynchronous operation. The task result contains the saved payment data transfer object.</returns>
+    private async Task<PaymentDto> SavePaymentAsync(CreatePaymentDto? payment, CancellationToken cancellationToken)
     {
         logger.LogDebug("Mapping PaymentDto to Payment entity for saving.");
-        try
-        {
-            Payment paymentEntity = mapper.Map<CreatePaymentDto, Payment>(payment);
-            await dbContext.Payments.AddAsync(paymentEntity, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
 
-            await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
-
-            return mapper.Map<Payment, PaymentDto>(paymentEntity);
-
-        }
-        catch (OperationCanceledException)
+        if (payment == null)
         {
-            logger.LogWarning("SavePaymentAsync for ReferenceNumber {ReferenceNumber} was cancelled.", payment?.ReferenceNumber);
-            throw;
+            logger.LogWarning("Validation failed: Payment details cannot be null.");
+            throw new ArgumentNullException(nameof(payment), "Payment details cannot be null.");
         }
-        catch (DbUpdateException dbUpdateEx)
-        {
-            logger.LogError(dbUpdateEx, "Database update error while saving payment with ReferenceNumber: {ReferenceNumber}", payment?.ReferenceNumber);
 
-            if (dbUpdateEx.InnerException?.Message.Contains("duplicate key") == true)
-            {
-                throw new PaymentAlreadyExistsException("A payment with this reference number already exists.", dbUpdateEx);
-            }
+        ValidatePayment(payment, cancellationToken);
 
-            throw new PaymentException($"Could not save payment with ReferenceNumber {payment?.ReferenceNumber} due to a database update error.", dbUpdateEx);
-        }
-        catch (DbException dbEx) // Catch other general database errors (connection, etc.)
-        {
-            logger.LogError(dbEx, "A general database error occurred while saving payment with ReferenceNumber: {ReferenceNumber}", payment?.ReferenceNumber);
-            throw new PaymentException($"A database error occurred while saving payment with ReferenceNumber {payment?.ReferenceNumber}.", dbEx);
-        }
-        catch (Exception ex) // Catch any other unexpected errors during save
-        {
-            logger.LogError(ex, "An unexpected error occurred while saving payment with ReferenceNumber: {ReferenceNumber}", payment?.ReferenceNumber);
-            throw new PaymentException($"An unexpected error occurred while saving payment with ReferenceNumber {payment?.ReferenceNumber}.", ex);
-        }
+        var paymentEntity = mapper.Map<CreatePaymentDto, Payment>(payment);
+
+        await dbContext.Payments.AddAsync(paymentEntity, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
+
+        logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentEntity.Id);
+        return mapper.Map<Payment, PaymentDto>(paymentEntity);
     }
 
     /// <summary>
     /// Constructs a queryable collection of payments based on the provided filter criteria.
     /// </summary>
     /// <param name="paymentFilter">The filter object containing criteria such as keywords, beneficiary account ID, or originator account ID.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A queryable collection of payments filtered based on the criteria specified within the paymentFilter.</returns>
-    private IQueryable<Payment> GetPaymentsQuery(PaymentFilter paymentFilter, CancellationToken cancellationToken)
+    private IQueryable<Payment> GetPaymentsQuery(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -260,7 +232,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     }
 
     /// <summary>
-    /// Validates the provided payment details to ensure they meet the required criteria.
+    /// Validates provided payment details to ensure they meet the required criteria.
     /// </summary>
     /// <param name="payment">The payment data to be validated.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
@@ -269,13 +241,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        logger.LogInformation("Starting validation for payment: {ReferenceNumber}", payment?.ReferenceNumber);
-
-        if (payment == null)
-        {
-            logger.LogWarning("Validation failed: Payment details cannot be null.");
-            throw new ArgumentNullException(nameof(payment), "Payment details cannot be null.");
-        }
+        logger.LogInformation("Starting validation for payment: {ReferenceNumber}", payment.ReferenceNumber);
 
         if (string.IsNullOrEmpty(payment.ReferenceNumber))
         {

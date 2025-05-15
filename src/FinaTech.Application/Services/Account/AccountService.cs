@@ -81,7 +81,7 @@ public class AccountService : BaseApplicationService, IAccountService
     /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
     /// <returns>A paginated result containing a list of accounts and additional metadata.</returns>
     /// <exception cref="AccountException">Thrown when errors occur specific to account retrieval.</exception>
-    public async Task<PagedResultDto<AccountDto>> GetAccountsAsync(AccountFilter accountFilter,
+    public async Task<PagedResultDto<AccountDto>> GetAccountsAsync(AccountFilter? accountFilter,
         CancellationToken cancellationToken)
     {
         logger.LogInformation(
@@ -90,6 +90,8 @@ public class AccountService : BaseApplicationService, IAccountService
 
         try
         {
+            ArgumentNullException.ThrowIfNull(accountFilter);
+
             IQueryable<Core.Account> accountQuery = GetAccountQuery(accountFilter, cancellationToken);
 
             List<Core.Account> accounts = await accountQuery
@@ -98,19 +100,19 @@ public class AccountService : BaseApplicationService, IAccountService
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            int totalCount = await accountQuery.CountAsync(cancellationToken);
+            var totalCount = await accountQuery.CountAsync(cancellationToken);
 
-            IReadOnlyList<AccountDto> AccountDtos =
+            var accountDtos =
                 mapper.Map<List<Core.Account>, IReadOnlyList<AccountDto>>(accounts);
 
             var pagedResultDto = new PagedResultDto<AccountDto>
             {
-                Items = AccountDtos,
+                Items = accountDtos,
                 TotalCount = totalCount
             };
 
             logger.LogInformation("Retrieved {AccountCount} accounts out of {TotalCount} total accounts.",
-                AccountDtos?.Count, totalCount);
+                accountDtos?.Count, totalCount);
 
             return pagedResultDto;
         }
@@ -124,6 +126,11 @@ public class AccountService : BaseApplicationService, IAccountService
             logger.LogError(dbEx, "Database error while retrieving accounts with filter: {Filter}", accountFilter);
             throw new AccountException("Could not retrieve accounts due to a database error.", dbEx);
         }
+        catch (ArgumentNullException argEx)
+        {
+            logger.LogError(argEx, "Invalid filter provided: {Filter}", accountFilter);
+            throw new AccountException("Invalid filter provided.", argEx);
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "An unexpected error occurred while retrieving accounts with filter: {Filter}", accountFilter);
@@ -132,36 +139,23 @@ public class AccountService : BaseApplicationService, IAccountService
     }
 
     /// <summary>
-    /// Creates a new account based on the provided account details.
+    /// Asynchronously creates a new account based on the provided account information.
     /// </summary>
-    /// <param name="account">The details of the account to be created. Must include name, IBAN, and BIC.</param>
+    /// <param name="account">An instance of <see cref="CreateAccountDto"/> containing the details of the account to be created.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A DTO containing the details of the newly created account.</returns>
-    /// <exception cref="BankAlreadyExistsException">Thrown if a bank associated with the account already exists.</exception>
-    /// <exception cref="AccountException">Thrown if an error occurs during the account creation process.</exception>
+    /// <returns>An instance of <see cref="AccountDto"/> representing the newly created account.</returns>
+    /// <exception cref="AccountAlreadyExistsException">Thrown when an account with the same details already exists.</exception>
+    /// <exception cref="AccountException">Thrown when an error occurs during account creation.</exception>
     public async Task<AccountDto> CreateAccountAsync(CreateAccountDto? account, CancellationToken cancellationToken)
     {
         logger.LogDebug("Mapping AccountDto to Account entity for saving.");
         try
         {
-            ValidateBank(account, cancellationToken);
-
-            Core.Account accountEntity = mapper.Map<CreateAccountDto, Core.Account>(account);
-
-            await dbContext.Accounts.AddAsync(accountEntity, cancellationToken);
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-
-            await dbContext.Accounts.Entry(accountEntity).ReloadAsync(cancellationToken);
-
-            logger.LogDebug("Account created completed successfully.");
-
-            return mapper.Map<Core.Account, AccountDto>(accountEntity);
-
+            return await SaveAccountAsync(account, cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            logger.LogWarning("SaveAccountAsync for Name {Name} was cancelled.", account?.Name);
+            logger.LogWarning("CreateAccountAsync for Name {Name} was cancelled.", account?.Name);
             throw;
         }
         catch (DbUpdateException dbUpdateEx)
@@ -196,6 +190,31 @@ public class AccountService : BaseApplicationService, IAccountService
 
     #region Private Methods
 
+    private async Task<AccountDto> SaveAccountAsync(CreateAccountDto? account, CancellationToken cancellationToken)
+    {
+        if (account == null)
+        {
+            logger.LogWarning("Validation failed: Account cannot be null.");
+            throw new ArgumentNullException(nameof(account), "Account cannot be null.");
+        }
+
+        ValidateBank(account, cancellationToken);
+
+        logger.LogDebug("Mapping AccountDto to Account entity for saving.");
+
+        Core.Account accountEntity = mapper.Map<CreateAccountDto, Core.Account>(account);
+
+        await dbContext.Accounts.AddAsync(accountEntity, cancellationToken);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        await dbContext.Accounts.Entry(accountEntity).ReloadAsync(cancellationToken);
+
+        logger.LogDebug("Account created completed successfully.");
+
+        return mapper.Map<Core.Account, AccountDto>(accountEntity);
+    }
+
     /// <summary>
     /// Builds and retrieves a queryable collection of accounts based on the provided account filter
     /// while supporting cancellation through a token. Applies filters for account search,
@@ -206,7 +225,7 @@ public class AccountService : BaseApplicationService, IAccountService
     /// <returns>An IQueryable sequence of accounts based on the applied filter.</returns>
     /// <exception cref="ArgumentException">Thrown when invalid parameters are provided,
     /// such as a negative skip count.</exception>
-    private IQueryable<Core.Account> GetAccountQuery(AccountFilter accountFilter, CancellationToken cancellationToken)
+    private IQueryable<Core.Account> GetAccountQuery(AccountFilter? accountFilter, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -216,40 +235,37 @@ public class AccountService : BaseApplicationService, IAccountService
             .Include(p=>p.Address)
             .AsQueryable();
 
-        if (accountFilter != null)
-        {
-            if (accountFilter.SkipCount < 0)
-            {
-                throw new ArgumentException("Skip count cannot be less than zero.", nameof(accountFilter.SkipCount));
-            }
+        if (accountFilter == null) return accounts;
 
-            if (!string.IsNullOrEmpty(accountFilter.Keywords))
-            {
-                logger.LogDebug("Applying keyword filter: {Keywords}", accountFilter.Keywords);
-                accounts = accounts.Where(p => p.Name != null && p.Name.Contains(accountFilter.Keywords) ||
-                                               p.Iban != null && p.Iban.Contains(accountFilter.Keywords) ||
-                                               p.Address.AddressLine1 != null && p.Address.AddressLine1.Contains(accountFilter.Keywords) ||
-                                               p.Address.AddressLine2 != null && p.Address.AddressLine2.Contains(accountFilter.Keywords)||
-                                               p.Address.AddressLine3 != null && p.Address.AddressLine3.Contains(accountFilter.Keywords) ||
-                                               p.Address.City != null && p.Address.City.Contains(accountFilter.Keywords) ||
-                                               p.Address.PostCode != null && p.Address.PostCode.Contains(accountFilter.Keywords) ||
-                                               p.Address.CountryCode != null && p.Address.CountryCode.Contains(accountFilter.Keywords) ||
-                                               p.AccountNumber != null && p.AccountNumber.Contains(accountFilter.Keywords));
-            }
+        if (accountFilter.SkipCount < 0)
+        {
+            throw new ArgumentException("Skip count cannot be less than zero.", nameof(accountFilter.SkipCount));
         }
+
+        if (string.IsNullOrEmpty(accountFilter.Keywords)) return accounts;
+
+        logger.LogDebug("Applying keyword filter: {Keywords}", accountFilter.Keywords);
+
+        accounts = accounts.Where(p => p.Address != null && (p.Name.Contains(accountFilter.Keywords) ||
+                                                             p.Iban.Contains(accountFilter.Keywords) ||
+                                                             p.Address.AddressLine1.Contains(accountFilter.Keywords) ||
+                                                             p.Address.AddressLine2 != null && p.Address.AddressLine2.Contains(accountFilter.Keywords)||
+                                                             p.Address.AddressLine3 != null && p.Address.AddressLine3.Contains(accountFilter.Keywords) ||
+                                                             p.Address.City != null && p.Address.City.Contains(accountFilter.Keywords) ||
+                                                             p.Address.PostCode != null && p.Address.PostCode.Contains(accountFilter.Keywords) ||
+                                                             p.Address.CountryCode.Contains(accountFilter.Keywords) ||
+                                                             p.AccountNumber != null && p.AccountNumber.Contains(accountFilter.Keywords)));
 
         return accounts;
     }
 
     /// <summary>
-    /// Validates the provided bank details, ensuring all required fields are specified and valid.
+    /// Validates the provided account details to ensure that required fields are not null or empty.
+    /// Throws exceptions if validation fails.
     /// </summary>
-    /// <param name="account"></param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <param name="bank">The bank object containing the details to be validated.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when the bank object or any required property is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when the bank ID is incorrectly specified.</exception>
+    /// <param name="account">The account information to validate, including its name, IBAN, and address.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <exception cref="ArgumentNullException">Thrown when required fields (e.g., Name, IBAN, or Address) are null or empty.</exception>
     private void ValidateBank(CreateAccountDto? account, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -262,25 +278,25 @@ public class AccountService : BaseApplicationService, IAccountService
             throw new ArgumentNullException(nameof(account), "Account cannot be null.");
         }
 
-        if (string.IsNullOrEmpty(account?.Name))
+        if (string.IsNullOrEmpty(account.Name))
         {
             logger.LogWarning("Validation failed: Account name cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Name), "Account name cannot be null or empty.");
         }
 
-        if (string.IsNullOrEmpty(account?.Iban))
+        if (string.IsNullOrEmpty(account.Iban))
         {
             logger.LogWarning("Validation failed: Account IBAN cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Iban), "Account IBAN cannot be null or empty.");
         }
 
-        if (account?.Address == null)
+        if (account.Address == null)
         {
             logger.LogWarning("Validation failed: Account Address cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Address), "Account Address cannot be null or empty.");
         }
 
-        if (string.IsNullOrEmpty(account?.Address?.CountryCode))
+        if (string.IsNullOrEmpty(account.Address.CountryCode))
         {
             logger.LogWarning("Validation failed: Account Address Country cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Address.CountryCode), "Account Address Country cannot be null or empty.");
