@@ -27,7 +27,6 @@ public class PaymentServiceTests
     private IMapper _mapper;
     private ILogger<PaymentService> _logger;
     private PaymentService _paymentService;
-    private static readonly Bank Bank = new() {Id = 1, Name = "Test Bank", BIC = "BIC0001"};
     private static readonly Address Address = new() {Id = 1, CountryCode = "GB", AddressLine1 = "Test St"};
 
     private List<Payment> GetSamplePayments(int count, int startId = 1)
@@ -38,24 +37,22 @@ public class PaymentServiceTests
         {
             Id = 123,
             AddressId = Address.Id,
-            BankId = Bank.Id,
             Name = "BeneficiaryAccount",
             AccountNumber = "12344",
             Iban = "GB12FINA1234567890",
+            Bic="BIC0001",
             Address = Address,
-            Bank = Bank
         };
 
         Account originatorAccount = new Account()
         {
             Id = 124,
             AddressId = Address.Id,
-            BankId = Bank.Id,
             Name = "OriginatorAccount",
             AccountNumber = "12345",
             Iban = "GB12FINA1234567891",
+            Bic = "BIC0001",
             Address = Address,
-            Bank = Bank
         };
 
         for (int i = 0; i < count; i++)
@@ -243,7 +240,7 @@ public class PaymentServiceTests
     [Test]
     public async Task CreatePaymentAsync_ShouldCreatePayment_WhenValidInput()
     {
-        var validCreatePaymentDto = new CreatePaymentDto(1, 10, 20, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var validCreatePaymentDto = new CreatePaymentDto(10, 20, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "Initial payment details", "NEWREF123");
 
         var cancellationToken = CancellationToken.None;
@@ -263,7 +260,7 @@ public class PaymentServiceTests
     [Test]
     public async Task CreatePaymentAsync_ShouldThrowArgumentNullException_WhenValidationFails()
     {
-        var invalidCreatePaymentDto = new CreatePaymentDto(1, 10, 20, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var invalidCreatePaymentDto = new CreatePaymentDto(10, 20, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "NEWREF123", null);
 
         var cancellationToken = CancellationToken.None;

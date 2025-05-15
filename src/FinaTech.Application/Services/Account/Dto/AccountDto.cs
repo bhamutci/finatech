@@ -1,14 +1,11 @@
-using FinaTech.Application.Services.Bank.Dto;
-
 namespace FinaTech.Application.Services.Account.Dto;
 
 public record AccountDto(
     int Id,
-    int BankId,
     int AddressId,
     string Name,
-    string? AccountNumber,
+    string AccountNumber,
     string Iban,
-    AddressDto? Address,
-    BankDto? Bank)
+    string BIC,
+    AddressDto? Address)
 { }

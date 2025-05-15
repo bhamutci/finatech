@@ -251,7 +251,6 @@ public class AccountService: BaseApplicationService, IAccountService
         logger.LogDebug("Building account query with filter: {Filter}", accountFilter);
 
         var accounts = dbContext.Accounts
-            .Include(p => p.Bank)
             .Include(p=>p.Address)
             .AsQueryable();
 

@@ -25,7 +25,7 @@ public static class EntityFrameworkModule
     /// <returns>
     /// The updated <see cref="IServiceCollection"/> instance to allow for method chaining.
     /// </returns>
-    public static IServiceCollection AddEntityFramework(this IServiceCollection services, IConfiguration configuration)
+    public static void AddEntityFramework(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
@@ -34,7 +34,5 @@ public static class EntityFrameworkModule
             builder.EnableSensitiveDataLogging();
             builder.UseNpgsql(connectionString);
         });
-
-        return services;
     }
 }

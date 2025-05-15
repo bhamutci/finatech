@@ -12,7 +12,6 @@ using Application.Mapper;
 using EntityFramework.PostgresSqlServer;
 using FinaTech.Application.Services.Account;
 using FinaTech.Application.Services.Account.Dto;
-using FinaTech.Application.Services.Bank.Dto;
 
 [TestFixture]
 public class AccountServiceTests
@@ -57,16 +56,8 @@ public class AccountServiceTests
         const string accountName = "Test Account Name";
         const string iban = "GB12FINA1234567890";
         const string accountNumber = "12345";
+        const string bic = "BIC0001";
         var cancellationToken = CancellationToken.None;
-
-        // Add the Bank entity to the in-memory database
-        var bank = new Core.Bank()
-        {
-            Id = 1,
-            Name = "Test Bank",
-            BIC = "BIC0001"
-        };
-        _dbContext.Banks.Add(bank);
 
         // Add the Address entity to the in-memory database
         var address = new Core.Address()
@@ -82,18 +73,17 @@ public class AccountServiceTests
         {
             Id = accountId,
             AddressId = address.Id,
-            BankId = bank.Id,
             Name = accountName,
             AccountNumber = "12345",
             Iban = iban,
+            Bic = bic,
             Address = address,
-            Bank = bank
         };
 
         _dbContext.Accounts.Add(accountEntity);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var expectedAccountDto = new AccountDto(accountId, bank.Id, address.Id, accountName, accountNumber, iban, null, null);
+        var expectedAccountDto = new AccountDto(accountId, address.Id, accountName, accountNumber, iban, null, null);
 
         // Act: Call the method being tested
         var resultDto = await _accountService.GetAccountAsync(accountId, cancellationToken);
@@ -248,11 +238,11 @@ public class AccountServiceTests
     {
         var validAccountDto = new CreateAccountDto(
             Id: 0,
-            BankId: 1,
             AddressId: 0,
             Name: "New Test Account",
             AccountNumber: "98765",
             Iban: "NL99FINA9876543210",
+            Bic: "BIC0001",
             Address: new AddressDto(0, "New Address Line 1", null, null, "Amsterdam", "1000AA",
                 "NL")
         );
@@ -279,11 +269,11 @@ public class AccountServiceTests
         // Arrange: Create an invalid AccountDto (e.g., missing required Name)
         var invalidAccountDto = new CreateAccountDto(
             Id: 0,
-            BankId: 1,
             AddressId: 0,
             Name: null,
             AccountNumber: "98765",
             Iban: "NL99FINA9876543210",
+            Bic: "BIC0001",
             Address: new AddressDto(0, "New Address Line 1", null, null, "Amsterdam", "1000AA", "NL")
         );
 
@@ -310,12 +300,6 @@ public class AccountServiceTests
     {
         var accounts = new List<Core.Account>();
 
-        var bank = new Core.Bank
-        {
-            Id = 1,
-            Name = "Test Bank",
-            BIC = "BIC0001"
-        };
 
         var address = new Core.Address
         {
@@ -333,10 +317,9 @@ public class AccountServiceTests
                 Name = $"Account {i}",
                 AccountNumber = $"ACC{i.ToString().PadLeft(4, '0')}",
                 Iban = $"IBAN{i.ToString().PadLeft(10, '0')}",
-                BankId = bank.Id,
+                Bic = "BIC0001",
                 AddressId = address.Id,
                 Address = address,
-                Bank = bank
             });
         }
 
@@ -345,11 +328,9 @@ public class AccountServiceTests
 
     private List<AccountDto> GetSampleAccountDtos(List<Core.Account> entities)
     {
-        var bank = new BankDto(1, "Test Bank", "BIC0001");
-
         var address = new AddressDto(1, "Test St", "", "", "", "", "GB");
 
-        return entities.Select(entity => new AccountDto(entity.Id, bank.Id, address.Id, entity.Name, "12345", "GB12FINA1234567890", address, bank)).ToList();
+        return entities.Select(entity => new AccountDto(entity.Id, address.Id, entity.Name, "12345", "GB12FINA1234567890","BIC0001", address)).ToList();
     }
 
 }

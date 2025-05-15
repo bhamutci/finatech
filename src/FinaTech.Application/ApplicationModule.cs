@@ -6,9 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Mapper;
 using EntityFramework;
 using Services.Account;
-using Services.Bank;
 using Services.Payment;
-using Services.Strategy;
 
 /// <summary>
 /// Provides extension methods for configuring application-specific services in the dependency injection container.
@@ -21,14 +19,11 @@ public static class ApplicationModule
     /// <param name="services">The collection of service descriptors.</param>
     /// <param name="configuration">The configuration object used to configure services.</param>
     /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+    public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddEntityFramework(configuration);
         services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
         services.AddScoped<IAccountService, AccountService>();
-        services.AddScoped<IBankService, BankService>();
         services.AddScoped<IPaymentService, PaymentService>();
-
-        return services;
     }
 }

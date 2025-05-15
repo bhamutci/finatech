@@ -5,7 +5,6 @@ using AutoMapper;
 using Core;
 using Services.Payment.Dto;
 using Services.Account.Dto;
-using Services.Bank.Dto;
 
 public class DtoAutoMapperProfile: Profile
 {
@@ -17,7 +16,6 @@ public class DtoAutoMapperProfile: Profile
     public DtoAutoMapperProfile()
     {
         AddressProfile();
-        BankProfile();
         AccountProfile();
         MoneyProfile();
         PaymentProfile();
@@ -81,18 +79,5 @@ public class DtoAutoMapperProfile: Profile
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
 
         CreateMap<CreatePaymentDto, Payment>();
-    }
-
-    /// <summary>
-    /// Configures the mapping rules for the Bank entity and its corresponding data transfer object (BankDto)
-    /// using the AutoMapper library. This profile ensures proper property mappings between Bank and BankDto,
-    /// including handling of associated Account objects.
-    /// </summary>
-    private void BankProfile()
-    {
-        CreateMap<Bank, BankDto>()
-            .MaxDepth(1)
-            .ReverseMap()
-            .MaxDepth(1);
     }
 }

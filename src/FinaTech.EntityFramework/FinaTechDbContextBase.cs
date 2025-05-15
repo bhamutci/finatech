@@ -12,11 +12,6 @@ namespace FinaTech.EntityFramework;
 public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : DbContext(options)
   where T : DbContext
 {
-  /// <summary>
-  /// Gets or sets the database set for banking entities, enabling CRUD operations
-  /// on the <see cref="FinaTech.Core.Bank"/> entities stored in the database.
-  /// </summary>
-  public DbSet<Bank> Banks { get; set; }
 
   /// <summary>
   /// Gets or sets the database set for payment transactions, allowing CRUD operations
@@ -43,28 +38,9 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
-    CreateBankEntity(modelBuilder);
     CreateAddressEntity(modelBuilder);
     CreateAccountEntity(modelBuilder);
     CreatePaymentEntity(modelBuilder);
-  }
-
-  /// <summary>
-  /// Configures the entity model and relationships for the <see cref="Bank"/> entity.
-  /// </summary>
-  /// <param name="modelBuilder">The builder used to define the entity structure and relationships in the database.</param>
-  private void CreateBankEntity(ModelBuilder modelBuilder)
-  {
-    modelBuilder.Entity<Bank>(bank =>
-    {
-      bank.ToTable("Banks");
-      bank.HasIndex(b => b.Id);
-      bank.HasIndex(b => b.Name);
-      bank.HasIndex(b => b.BIC);
-      bank.HasMany(b => b.Accounts)
-        .WithOne(a => a.Bank)
-        .HasForeignKey(a => a.BankId);
-    });
   }
 
   /// <summary>
@@ -79,14 +55,12 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
       account.HasKey(a => a.Id);
       account.HasIndex(a => a.Name);
       account.HasIndex(a => a.AccountNumber);
+      account.HasIndex(a => a.Iban);
+      account.HasIndex(a => a.Bic);
 
       account.HasOne(a => a.Address)
         .WithMany()
         .HasForeignKey(a=>a.AddressId);
-
-      account.HasOne(a => a.Bank)
-        .WithMany(b => b.Accounts)
-        .HasForeignKey(a => a.BankId);
     });
   }
 

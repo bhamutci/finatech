@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace FinaTech.Core;
+
+using System.ComponentModel.DataAnnotations;
 
 /// <summary>
 /// Represents an account entity, providing details about the account such as name,
@@ -13,17 +13,12 @@ public sealed class Account
     /// </summary>
     public int Id { get; set; }
 
-    /// <summary>
-    /// Gets or sets the identifier for the associated bank entity.
-    /// </summary>
-    [Required]
-    public required int BankId { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier for the associated address entity.
     /// </summary>
     [Required]
-    public required int AddressId { get; set; }
+    public int AddressId { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the account.
@@ -31,7 +26,7 @@ public sealed class Account
     /// </summary>
     [Required]
     [StringLength(AccountConstants.MaxLengthOfName)]
-    public required string Name { get; set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// Gets or sets the account number associated with the account entity.
@@ -43,18 +38,18 @@ public sealed class Account
     /// Gets or sets the International Bank Account Number (IBAN) associated with the account.
     /// </summary>
     [StringLength(AccountConstants.MaxLengthOfIban)]
-    public required string Iban { get; set; }
+    public string Iban { get; set; }
+
+    /// <summary>
+    /// Gets or sets the International Bank Account Number (IBAN) associated with the account.
+    /// </summary>
+    [StringLength(AccountConstants.MaxLengthOfBic)]
+    public string Bic { get; set; }
 
     /// <summary>
     /// Gets or sets the address associated with the account entity.
     /// </summary>
     public Address? Address { get; set; }
-
-    /// <summary>
-    /// Represents a financial institution associated with an account,
-    /// detailing properties such as the bank's name and BIC.
-    /// </summary>
-    public Bank? Bank { get; set; }
 
 }
 
