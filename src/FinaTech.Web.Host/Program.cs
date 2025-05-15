@@ -1,12 +1,18 @@
+using System.Data.Common;
+using FinaTech.Application;
+using FinaTech.Application.Exceptions;
+using FinaTech.Application.Services.Payment;
+using FinaTech.Application.Services.Payment.Dto;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddLogging();
 builder.Services.AddOpenApi();
-
+builder.Services.AddApplication(builder.Configuration);
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+builder.Services.AddEndpointsApiExplorer();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -14,28 +20,44 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+// Endpoint for GET /payments/{id}
+// Retrieves a single payment by ID
+app.MapGet("/payments/{id:int}", async (int id, CancellationToken cancellationToken) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    try
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+        IPaymentService paymentService = app.Services.GetService<IPaymentService>();
+        var payment = await paymentService.GetPaymentAsync(id, cancellationToken);
+
+        if (payment == null)
+        {
+            return Results.NotFound($"Payment with ID {id} not found.");
+        }
+
+        return Results.Ok(payment);
+    }
+    catch (OperationCanceledException)
+    {
+        return Results.StatusCode(499);
+    }
+    catch (PaymentException ex)
+    {
+        return Results.Json(new {Message= ex.Message }, statusCode:500);
+    }
+    catch (DbException ex)
+    {
+        return Results.Json(new {Message = ex.Message}, statusCode:500);
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new {Message = ex.Message}, statusCode:500);
+    }
+})
+.WithName("GetPayment")
+.Produces<PaymentDto>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound)
+.Produces(StatusCodes.Status499ClientClosedRequest)
+.Produces(StatusCodes.Status500InternalServerError);
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
-}

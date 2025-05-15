@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\FinaTech.Application\FinaTech.Application.csproj" />
       <ProjectReference Include="..\FinaTech.EntityFramework\FinaTech.EntityFramework.csproj" />
     </ItemGroup>
 
