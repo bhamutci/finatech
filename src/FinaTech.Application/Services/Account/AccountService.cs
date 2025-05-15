@@ -43,14 +43,14 @@ public class AccountService: BaseApplicationService, IAccountService
         logger.LogInformation("Attempting to retrieve account with ID: {AccountId}", id);
         try
         {
-            var AccountEntity = await dbContext.Accounts.FindAsync([id], cancellationToken);
+            var accountEntity = await dbContext.Accounts.FindAsync([id], cancellationToken);
 
-            if (AccountEntity == null)
+            if (accountEntity == null)
             {
                 logger.LogWarning("Account with ID: {AccountId} not found.", id);
             }
 
-            return mapper.Map<AccountDto>(AccountEntity);
+            return mapper.Map<AccountDto>(accountEntity);
 
         }
         catch (OperationCanceledException)
@@ -62,7 +62,7 @@ public class AccountService: BaseApplicationService, IAccountService
         {
             logger.LogError(dbEx, "Database error while retrieving account with ID: {AccountID}", id); // Log database error
             throw new AccountException($"Could not retrieve account with ID {id} due to a database error.",
-                dbEx); // Throw custom exception
+                dbEx); // Throw a custom exception
         }
         catch (Exception ex) // Catch any other unexpected errors
         {
