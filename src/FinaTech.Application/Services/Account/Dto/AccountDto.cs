@@ -4,8 +4,8 @@ public record AccountDto(
     int Id,
     int AddressId,
     string Name,
-    string AccountNumber,
     string Iban,
-    string BIC,
+    string Bic,
+    string? AccountNumber,
     AddressDto? Address)
 { }

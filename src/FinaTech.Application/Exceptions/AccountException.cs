@@ -5,7 +5,7 @@ public class AccountException: Exception
     protected AccountException(string message) : base(message) { }
     public AccountException(string message, Exception innerException) : base(message, innerException) { }
 }
-public class AccountAlreadyExistsException : BankException
+public class AccountAlreadyExistsException : AccountException
 {
     public AccountAlreadyExistsException(string message) : base(message) { }
     public AccountAlreadyExistsException(string message, Exception innerException) : base(message, innerException) { }

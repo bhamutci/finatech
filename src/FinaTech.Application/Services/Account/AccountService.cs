@@ -11,8 +11,11 @@ using Exceptions;
 using FinaTech.Application.Services.Dto;
 using EntityFramework.PostgresSqlServer;
 
-
-public class AccountService: BaseApplicationService, IAccountService
+/// <summary>
+/// Represents a service for managing accounts in the banking domain.
+/// Provides methods to retrieve, create, and manage account-related operations.
+/// </summary>
+public class AccountService : BaseApplicationService, IAccountService
 {
     #region Constructors
 
@@ -72,12 +75,12 @@ public class AccountService: BaseApplicationService, IAccountService
     }
 
     /// <summary>
-    /// Asynchronously retrieves a paginated list of accounts based on the provided filter criteria.
+    /// Retrieves a paginated list of accounts based on the provided filter criteria.
     /// </summary>
-    /// <param name="accountFilter">The filter criteria to apply while retrieving accounts, including keywords and pagination options.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A <see cref="PagedResultDto{AccountDto}"/> containing a list of accounts and the total count of matching accounts.</returns>
-    /// <exception cref="AccountException">Thrown when an error occurs while retrieving accounts, such as database errors or unexpected issues.</exception>
+    /// <param name="accountFilter">The filter criteria used to refine the account list, including pagination and search keywords.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>A paginated result containing a list of accounts and additional metadata.</returns>
+    /// <exception cref="AccountException">Thrown when errors occur specific to account retrieval.</exception>
     public async Task<PagedResultDto<AccountDto>> GetAccountsAsync(AccountFilter accountFilter,
         CancellationToken cancellationToken)
     {
@@ -92,10 +95,10 @@ public class AccountService: BaseApplicationService, IAccountService
             List<Core.Account> accounts = await accountQuery
                 .Skip(accountFilter.SkipCount)
                 .Take(accountFilter.MaxResultCount)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             int totalCount = await accountQuery.CountAsync(cancellationToken);
-
 
             IReadOnlyList<AccountDto> AccountDtos =
                 mapper.Map<List<Core.Account>, IReadOnlyList<AccountDto>>(accounts);
@@ -128,68 +131,21 @@ public class AccountService: BaseApplicationService, IAccountService
         }
     }
 
-
     /// <summary>
-    /// Creates a new account based on the provided account data and returns the created account details.
+    /// Creates a new account based on the provided account details.
     /// </summary>
-    /// <param name="account">The account data to be created, encapsulated in an <see cref="AccountDto"/> object.</param>
-    /// <param name="cancellationToken">A token to observe while waiting for the task to complete, enabling request cancellation.</param>
-    /// <returns>The details of the newly created account as an <see cref="AccountDto"/>.</returns>
-    /// <exception cref="BankException">Thrown when an unexpected error occurs during account creation.</exception>
-    /// <exception cref="AccountException">Thrown when a domain-specific account error is encountered.</exception>
-    /// <exception cref="ArgumentException">Thrown when invalid arguments are passed for account creation.</exception>
-    /// <exception cref="OperationCanceledException">Thrown when the operation is canceled through the provided cancellation token.</exception>
-    public async Task<AccountDto> CreateAccountAsync(CreateAccountDto account, CancellationToken cancellationToken)
-    {
-        try
-        {
-            ValidateBank(account, cancellationToken);
-
-            var accountDto = await SaveAccountAsync(account, cancellationToken);
-
-            logger.LogInformation("Account created successfully with ID: {AccountID}", accountDto.Id);
-
-            return accountDto;
-        }
-        catch (OperationCanceledException)
-        {
-            logger.LogWarning("CreateAccountAsync for Name {Name} was cancelled.", account?.Name);
-            throw;
-        }
-        catch (ArgumentException argEx)
-        {
-            logger.LogWarning(argEx, "Account creation failed due to invalid input: {Message}", argEx.Message);
-            throw;
-        }
-        catch (AccountException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An unexpected error occurred while creating an account. Name: {Name}", account?.Name);
-            throw new AccountException("An unexpected error occurred while creating the account.", ex);
-        }
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    /// <summary>
-    /// Asynchronously saves an account to the database, including mapping, validation,
-    /// and error handling during the persistence process.
-    /// </summary>
-    /// <param name="account">The account information to be saved, encapsulated in an <see cref="AccountDto"/> object.</param>
-    /// <param name="cancellationToken">The token used to propagate notification that the operation should be canceled.</param>
-    /// <returns>An <see cref="CreateAccountDto"/> representing the saved account with updated data from the database.</returns>
-    /// <exception cref="BankAlreadyExistsException">Thrown when the account conflicts with an existing bank entity.</exception>
-    /// <exception cref="AccountException">Thrown when any unforeseen issue prevents the account from being saved successfully.</exception>
-    private async Task<AccountDto> SaveAccountAsync(CreateAccountDto account, CancellationToken cancellationToken)
+    /// <param name="account">The details of the account to be created. Must include name, IBAN, and BIC.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A DTO containing the details of the newly created account.</returns>
+    /// <exception cref="BankAlreadyExistsException">Thrown if a bank associated with the account already exists.</exception>
+    /// <exception cref="AccountException">Thrown if an error occurs during the account creation process.</exception>
+    public async Task<AccountDto> CreateAccountAsync(CreateAccountDto? account, CancellationToken cancellationToken)
     {
         logger.LogDebug("Mapping AccountDto to Account entity for saving.");
         try
         {
+            ValidateBank(account, cancellationToken);
+
             Core.Account accountEntity = mapper.Map<CreateAccountDto, Core.Account>(account);
 
             await dbContext.Accounts.AddAsync(accountEntity, cancellationToken);
@@ -197,6 +153,8 @@ public class AccountService: BaseApplicationService, IAccountService
             await dbContext.SaveChangesAsync(cancellationToken);
 
             await dbContext.Accounts.Entry(accountEntity).ReloadAsync(cancellationToken);
+
+            logger.LogDebug("Account created completed successfully.");
 
             return mapper.Map<Core.Account, AccountDto>(accountEntity);
 
@@ -212,18 +170,18 @@ public class AccountService: BaseApplicationService, IAccountService
 
             if (dbUpdateEx.InnerException?.Message.Contains("duplicate key") == true)
             {
-                throw new BankAlreadyExistsException("An Account with this name exists.", dbUpdateEx);
+                throw new AccountAlreadyExistsException("An Account with this name exists.", dbUpdateEx);
             }
 
             throw new AccountException($"Could not save account with Name {account?.Name} due to a database update error.",
                 dbUpdateEx);
         }
-        catch (DbException dbEx) // Catch other general database errors (connection, etc.)
+        catch (DbException dbEx)
         {
             logger.LogError(dbEx, "A general database error occurred while saving account with Name: {Name}", account?.Name);
             throw new AccountException($"A database error occurred while saving account with Name {account?.Name}.", dbEx);
         }
-        catch (Exception ex) // Catch any other unexpected errors during save
+        catch (Exception ex)
         {
             logger.LogError(ex,
                 "An unexpected error occurred while saving account with Name: {Name}",
@@ -234,15 +192,19 @@ public class AccountService: BaseApplicationService, IAccountService
         }
     }
 
+    #endregion
+
+    #region Private Methods
+
     /// <summary>
     /// Builds and retrieves a queryable collection of accounts based on the provided account filter
-    /// while supporting cancellation through a token. Applies filters for account search
+    /// while supporting cancellation through a token. Applies filters for account search,
     /// including skip count and keyword criteria.
     /// </summary>
     /// <param name="accountFilter">The filter criteria for querying accounts.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An IQueryable sequence of accounts based on the applied filter.</returns>
-    /// <exception cref="ArgumentException">Thrown when invalid parameters are provided
+    /// <exception cref="ArgumentException">Thrown when invalid parameters are provided,
     /// such as a negative skip count.</exception>
     private IQueryable<Core.Account> GetAccountQuery(AccountFilter accountFilter, CancellationToken cancellationToken)
     {
@@ -288,7 +250,7 @@ public class AccountService: BaseApplicationService, IAccountService
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the bank object or any required property is null.</exception>
     /// <exception cref="ArgumentException">Thrown when the bank ID is incorrectly specified.</exception>
-    private void ValidateBank(CreateAccountDto account, CancellationToken cancellationToken)
+    private void ValidateBank(CreateAccountDto? account, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -300,25 +262,25 @@ public class AccountService: BaseApplicationService, IAccountService
             throw new ArgumentNullException(nameof(account), "Account cannot be null.");
         }
 
-        if (string.IsNullOrEmpty(account.Name))
+        if (string.IsNullOrEmpty(account?.Name))
         {
             logger.LogWarning("Validation failed: Account name cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Name), "Account name cannot be null or empty.");
         }
 
-        if (string.IsNullOrEmpty(account.Iban))
+        if (string.IsNullOrEmpty(account?.Iban))
         {
             logger.LogWarning("Validation failed: Account IBAN cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Iban), "Account IBAN cannot be null or empty.");
         }
 
-        if (account.Address == null)
+        if (account?.Address == null)
         {
             logger.LogWarning("Validation failed: Account Address cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Address), "Account Address cannot be null or empty.");
         }
 
-        if (string.IsNullOrEmpty(account.Address.CountryCode))
+        if (string.IsNullOrEmpty(account?.Address?.CountryCode))
         {
             logger.LogWarning("Validation failed: Account Address Country cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Address.CountryCode), "Account Address Country cannot be null or empty.");

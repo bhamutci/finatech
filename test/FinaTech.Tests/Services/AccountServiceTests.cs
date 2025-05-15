@@ -237,8 +237,6 @@ public class AccountServiceTests
     public async Task CreateAccountAsync_ShouldCreateAccount_WhenValidAccountDto()
     {
         var validAccountDto = new CreateAccountDto(
-            Id: 0,
-            AddressId: 0,
             Name: "New Test Account",
             AccountNumber: "98765",
             Iban: "NL99FINA9876543210",
@@ -268,8 +266,6 @@ public class AccountServiceTests
     {
         // Arrange: Create an invalid AccountDto (e.g., missing required Name)
         var invalidAccountDto = new CreateAccountDto(
-            Id: 0,
-            AddressId: 0,
             Name: null,
             AccountNumber: "98765",
             Iban: "NL99FINA9876543210",
