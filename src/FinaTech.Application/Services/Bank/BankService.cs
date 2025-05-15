@@ -23,7 +23,7 @@ public class BankService : BaseApplicationService, IBankService
     /// Provides functionalities for managing banks, including retrieving, creating,
     /// and handling related operations within the banking domain.
     /// </summary>
-    public BankService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, Logger<BankService> logger) : base(
+    public BankService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<BankService> logger) : base(
         dbContext, mapper, logger)
     {
     }

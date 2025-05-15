@@ -2,8 +2,11 @@ namespace FinaTech.Application;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using EntityFramework;
+
 using Mapper;
+using EntityFramework;
+using Services.Account;
+using Services.Bank;
 using Services.Payment;
 using Services.Strategy;
 
@@ -22,8 +25,8 @@ public static class ApplicationModule
     {
         services.AddEntityFramework(configuration);
         services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
-        services.AddScoped<PaymentStrategy, SEPAPayment>();
-        services.AddScoped<PaymentStrategy, SWIFTPayment>();
+        services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IBankService, BankService>();
         services.AddScoped<IPaymentService, PaymentService>();
 
         return services;
