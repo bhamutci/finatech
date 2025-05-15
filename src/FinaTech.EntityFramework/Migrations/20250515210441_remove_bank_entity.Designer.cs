@@ -3,6 +3,7 @@ using System;
 using FinaTech.EntityFramework.PostgresSqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinaTech.EntityFramework.Migrations
 {
     [DbContext(typeof(FinaTechPostgresSqlDbContext))]
-    partial class FinaTechPostgresSqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515210441_remove_bank_entity")]
+    partial class remove_bank_entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
