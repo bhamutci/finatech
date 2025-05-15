@@ -118,15 +118,17 @@ public class PaymentService : BaseApplicationService, IPaymentService
     }
 
     /// <summary>
-    /// Asynchronously creates a new payment in the system and returns the created payment details.
+    /// Asynchronously creates a new payment.
     /// </summary>
-    /// <param name="payment">The payment details to be created, encapsulated in a <see cref="PaymentDto"/> object.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation, with a result of <see cref="PaymentDto"/> containing the details of the newly created payment.</returns>
-    public async Task<PaymentDto> CreatePaymentAsync(PaymentDto payment, CancellationToken cancellationToken)
+    /// <param name="payment">The details of the payment to be created.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>A <see cref="PaymentDto"/> object representing the created payment.</returns>
+    /// <exception cref="PaymentException">Thrown when there is an issue creating the payment.</exception>
+    public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
     {
         try
         {
-            ValidatePaymentAsync(payment, cancellationToken);
+            ValidatePayment(payment, cancellationToken);
 
             var paymentDto = await SavePaymentAsync(payment, cancellationToken);
 
@@ -159,19 +161,31 @@ public class PaymentService : BaseApplicationService, IPaymentService
     #region Private Methods
 
     /// <summary>
-    /// Asynchronously saves a payment to the database.
+    /// Asynchronously saves a payment transaction to the database.
     /// </summary>
-    /// <param name="payment">The payment data to be saved.</param>
-    /// <param name="cancellationToken">Token to observe while waiting for the task to complete.</param>
-    /// <return>A task representing the asynchronous operation, containing the saved payment as a <see cref="PaymentDto"/> object.</return>
-    private async Task<PaymentDto> SavePaymentAsync(PaymentDto payment, CancellationToken cancellationToken)
+    /// <param name="payment">The payment data to be saved, represented as a <see cref="CreatePaymentDto"/> object.</param>
+    /// <param name="cancellationToken">
+    /// A token used to monitor for cancellation requests, allowing the operation to be canceled if necessary.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The result contains the information about the saved payment represented as a <see cref="PaymentDto"/> object.
+    /// </returns>
+    /// <exception cref="PaymentAlreadyExistsException">
+    /// Thrown when a payment with the same unique identifier already exists in the database.
+    /// </exception>
+    /// <exception cref="PaymentException">
+    /// Thrown when an unexpected error occurs while processing or saving the payment.
+    /// </exception>
+    private async Task<PaymentDto> SavePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
     {
         logger.LogDebug("Mapping PaymentDto to Payment entity for saving.");
         try
         {
-            Payment paymentEntity = mapper.Map<PaymentDto, Payment>(payment);
+            Payment paymentEntity = mapper.Map<CreatePaymentDto, Payment>(payment);
             await dbContext.Payments.AddAsync(paymentEntity, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
+
+            await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
 
             return mapper.Map<Payment, PaymentDto>(paymentEntity);
 
@@ -251,7 +265,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="payment">The payment data to be validated.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="ArgumentNullException">Thrown when the payment or any required property of the payment is null or empty.</exception>
-    private void ValidatePaymentAsync(PaymentDto payment, CancellationToken cancellationToken)
+    private void ValidatePayment(CreatePaymentDto payment, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

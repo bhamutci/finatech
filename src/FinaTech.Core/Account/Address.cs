@@ -62,4 +62,16 @@ public sealed class Address
     [Required]
     [StringLength(AddressConstants.MaxLengthOfCountryCode)]
     public required string CountryCode { get; set; }
+
+    /// <summary>
+    /// Represents the address of an entity, including various address lines, city, postal code, and country code.
+    /// </summary>
+    /// <remarks>
+    /// Useful for storing and validating address details in the application.
+    /// Includes validation constraints for required fields and maximum field lengths.
+    /// </remarks>
+    public Address()
+    {
+        // Default parameterless constructor required for EF Core
+    }
 }

@@ -143,7 +143,7 @@ public class AccountService: BaseApplicationService, IAccountService
     {
         try
         {
-            ValidateBankAsync(account, cancellationToken);
+            ValidateBank(account, cancellationToken);
 
             var accountDto = await SaveAccountAsync(account, cancellationToken);
 
@@ -289,7 +289,7 @@ public class AccountService: BaseApplicationService, IAccountService
     /// <returns>A task representing the asynchronous operation.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the bank object or any required property is null.</exception>
     /// <exception cref="ArgumentException">Thrown when the bank ID is incorrectly specified.</exception>
-    private void ValidateBankAsync(CreateAccountDto account, CancellationToken cancellationToken)
+    private void ValidateBank(CreateAccountDto account, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

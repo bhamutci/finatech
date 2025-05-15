@@ -302,6 +302,7 @@ public class AccountServiceTests
     [TearDown]
     public void TearDown()
     {
+        _dbContext.Database.EnsureDeleted();
         _dbContext.Dispose();
     }
 

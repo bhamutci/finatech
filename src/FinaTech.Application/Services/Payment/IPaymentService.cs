@@ -1,9 +1,7 @@
-using FinaTech.Application.Services.Dto;
-
 namespace FinaTech.Application.Services.Payment;
 
 using Dto;
-
+using FinaTech.Application.Services.Dto;
 
 /// <summary>
 /// Represents a service for managing payment operations.
@@ -28,5 +26,5 @@ public interface IPaymentService
     /// </summary>
     /// <param name="payment">The <see cref="PaymentDto"/> object containing the details of the payment to create.</param>
     /// <returns>A <see cref="PaymentDto"/> object representing the newly created payment.</returns>
-    Task<PaymentDto> CreatePaymentAsync(PaymentDto payment, CancellationToken cancellationToken);
+    Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken);
 }

@@ -79,6 +79,8 @@ public class DtoAutoMapperProfile: Profile
             .MaxDepth(1)
             .ForMember(member =>member.ChargesBearer,
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
+
+        CreateMap<CreatePaymentDto, Payment>();
     }
 
     /// <summary>
@@ -90,23 +92,7 @@ public class DtoAutoMapperProfile: Profile
     {
         CreateMap<Bank, BankDto>()
             .MaxDepth(1)
-            .AfterMap(MapAccountDto)
             .ReverseMap()
             .MaxDepth(1);
-    }
-
-    /// <summary>
-    /// Maps account data from the Bank domain model to the BankDto data transfer object.
-    /// Specifically, it ensures that accounts from the Bank object are correctly added
-    /// to the corresponding Accounts collection in the BankDto.
-    /// </summary>
-    /// <param name="bank">The source domain model representing a bank and its associated data.</param>
-    /// <param name="bankDto">The destination data transfer object to which account data is mapped.</param>
-    private void MapAccountDto(Bank bank, BankDto bankDto)
-    {
-        /*foreach (var account in bankDto.Accounts)
-        {
-            bankDto.Accounts.Add(account);
-        }*/
     }
 }
