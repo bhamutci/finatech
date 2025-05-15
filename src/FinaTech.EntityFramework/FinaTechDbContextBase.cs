@@ -17,7 +17,7 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
   /// Gets or sets the database set for payment transactions, allowing CRUD operations
   /// on the <see cref="FinaTech.Core.Payment"/> entities stored in the database.
   /// </summary>
-  public DbSet<Core.Payment> Payments { get; set; }
+  public DbSet<Payment> Payments { get; set; }
 
   /// <summary>
   /// Gets or sets the database set for accounts, enabling CRUD operations
