@@ -1,13 +1,10 @@
-using FinaTech.Application.Services.Account;
-using FinaTech.Application.Services.Account.Dto;
-using FluentValidation;
-
 namespace FinaTech.Application.Services.Payment;
 
 using System.Data.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 
+using FluentValidation;
 using AutoMapper;
 
 using Core;
@@ -15,6 +12,7 @@ using Dto;
 using Exceptions;
 using EntityFramework.PostgresSqlServer;
 using FinaTech.Application.Services.Dto;
+using FinaTech.Application.Services.Account.Dto;
 
 /// <summary>
 /// Service for handling operations related to payments in the FinaTech application.
@@ -28,7 +26,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// that the provided payment data is valid and conforms to predefined
     /// business and application rules.
     /// </summary>
-    private readonly IValidator<CreatePaymentDto> paymentValidator;
+    private readonly IValidator<CreatePaymentDto> _paymentValidator;
 
     #endregion
 
@@ -40,7 +38,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<PaymentService> logger,
         IValidator<CreatePaymentDto> paymentValidator) : base(dbContext, mapper, logger)
     {
-
+        _paymentValidator = paymentValidator;
     }
 
     #endregion
@@ -159,7 +157,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
             logger.LogWarning("CreatePaymentAsync for ReferenceNumber {ReferenceNumber} was cancelled.", payment?.ReferenceNumber);
             throw;
         }
-        catch (ValidationException valEx)
+        catch (Exceptions.ValidationException valEx)
         {
             logger.LogDebug(valEx, "Payment creation aborted due to validation errors.");
             throw;
@@ -209,7 +207,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
 
         if (validationResult.Count > 0)
         {
-            throw new ValidationException("Payment input validation failed.", validationResult);
+            throw new Exceptions.ValidationException("Payment input validation failed.", validationResult);
         }
 
         var beneficiaryAccount = await GetOrCreateAccountAsync(payment.BeneficiaryAccount, cancellationToken);
@@ -312,7 +310,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
 
         logger.LogInformation("Starting validation for payment: {ReferenceNumber}", payment?.ReferenceNumber);
 
-        var validationResult = await paymentValidator.ValidateAsync(payment, cancellationToken);
+        var validationResult = await _paymentValidator.ValidateAsync(payment, cancellationToken);
 
         var errors = validationResult.Errors.Select(failure => failure.ErrorMessage).ToList();
 
