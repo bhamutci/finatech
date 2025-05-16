@@ -17,6 +17,17 @@ public interface IAccountService
     Task<AccountDto> GetAccountAsync(int id, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Retrieves the details of a specific account by its identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the account to retrieve.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation.
+    /// The task result contains an <see cref="AccountDto"/> representing the account details.
+    /// </returns>
+    Task<AccountDto> GetAccountAsync(string name, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Retrieves a paged list of accounts based on the specified filter criteria.
     /// </summary>
     /// <param name="accountFilter">The filter criteria to apply when retrieving the accounts.</param>

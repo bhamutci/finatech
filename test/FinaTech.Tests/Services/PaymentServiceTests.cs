@@ -5,8 +5,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 using AutoMapper;
+using FluentValidation;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+
 
 using System;
 using System.Linq;
@@ -18,6 +20,7 @@ using Core;
 using Application.Mapper;
 using EntityFramework.PostgresSqlServer;
 using FinaTech.Application.Services.Payment.Dto;
+using FinaTech.Application.Services.Account.Dto;
 using FinaTech.Application.Services.Payment;
 
 [TestFixture]
@@ -27,13 +30,15 @@ public class PaymentServiceTests
     private IMapper _mapper;
     private ILogger<PaymentService> _logger;
     private PaymentService _paymentService;
+    private IValidator<CreatePaymentDto> _validator;
     private static readonly Address Address = new() {Id = 1, CountryCode = "GB", AddressLine1 = "Test St"};
+    private static readonly AddressDto AddressDto = new(1,"Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
 
     private List<Payment> GetSamplePayments(int count, int startId = 1)
     {
         var payments = new List<Payment>();
 
-        Account beneficiaryAccount = new Account()
+        Account beneficiaryAccount = new Account
         {
             Id = 123,
             AddressId = Address.Id,
@@ -44,7 +49,7 @@ public class PaymentServiceTests
             Address = Address,
         };
 
-        Account originatorAccount = new Account()
+        Account originatorAccount = new Account
         {
             Id = 124,
             AddressId = Address.Id,
@@ -91,8 +96,9 @@ public class PaymentServiceTests
         _logger = factory.CreateLogger<PaymentService>();
         _mapper = serviceProvider.GetService<IMapper>();
         _dbContext = serviceProvider.GetService<FinaTechPostgresSqlDbContext>();
+        _validator = serviceProvider.GetService<IValidator<CreatePaymentDto>>();
 
-        _paymentService = new PaymentService(_dbContext, _mapper, _logger);
+        _paymentService = new PaymentService(_dbContext, _mapper, _logger, _validator);
     }
 
     [TearDown]
@@ -240,7 +246,12 @@ public class PaymentServiceTests
     [Test]
     public async Task CreatePaymentAsync_ShouldCreatePayment_WhenValidInput()
     {
-        var validCreatePaymentDto = new CreatePaymentDto(10, 20, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        CreateAccountDto beneficiaryAccount = new CreateAccountDto("BeneficiaryAccount", "GB12FINA1234567891", "BIC0001", "12345", AddressDto);
+
+        CreateAccountDto originatorAccount =
+            new CreateAccountDto("OriginatorAccount", "GB12FINA1234567891", "BIC0001", "12345", AddressDto);
+
+        var validCreatePaymentDto = new CreatePaymentDto(originatorAccount, beneficiaryAccount, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "Initial payment details", "NEWREF123");
 
         var cancellationToken = CancellationToken.None;
@@ -260,7 +271,7 @@ public class PaymentServiceTests
     [Test]
     public async Task CreatePaymentAsync_ShouldThrowArgumentNullException_WhenValidationFails()
     {
-        var invalidCreatePaymentDto = new CreatePaymentDto(10, 20, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var invalidCreatePaymentDto = new CreatePaymentDto(null, null, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "NEWREF123", null);
 
         var cancellationToken = CancellationToken.None;

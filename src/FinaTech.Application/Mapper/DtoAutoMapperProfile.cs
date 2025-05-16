@@ -78,6 +78,10 @@ public class DtoAutoMapperProfile: Profile
             .ForMember(member =>member.ChargesBearer,
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
 
-        CreateMap<CreatePaymentDto, Payment>();
+        CreateMap<CreatePaymentDto, Payment>()
+            .ForMember(member => member.BeneficiaryAccount,
+                opt=> opt.Ignore())
+            .ForMember(member => member.OriginatorAccount,
+            opt=> opt.Ignore());
     }
 }

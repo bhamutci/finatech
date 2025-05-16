@@ -1,3 +1,7 @@
+using FinaTech.Application.Services.Account;
+using FinaTech.Application.Services.Account.Dto;
+using FluentValidation;
+
 namespace FinaTech.Application.Services.Payment;
 
 using System.Data.Common;
@@ -20,10 +24,24 @@ public class PaymentService : BaseApplicationService, IPaymentService
     #region Constructors
 
     /// <summary>
+    /// Validator for the <see cref="CreatePaymentDto"/> object, ensuring
+    /// that the provided payment data is valid and conforms to predefined
+    /// business and application rules.
+    /// </summary>
+    private readonly IValidator<CreatePaymentDto> paymentValidator;
+
+    #endregion
+
+    #region Constructors
+
+    /// <summary>
     /// Service for handling operations related to payments in the FinaTech application.
     /// </summary>
-    public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<PaymentService> logger): base(dbContext, mapper, logger)
-    {}
+    public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<PaymentService> logger,
+        IValidator<CreatePaymentDto> paymentValidator) : base(dbContext, mapper, logger)
+    {
+
+    }
 
     #endregion
 
@@ -141,9 +159,19 @@ public class PaymentService : BaseApplicationService, IPaymentService
             logger.LogWarning("CreatePaymentAsync for ReferenceNumber {ReferenceNumber} was cancelled.", payment?.ReferenceNumber);
             throw;
         }
+        catch (ValidationException valEx)
+        {
+            logger.LogDebug(valEx, "Payment creation aborted due to validation errors.");
+            throw;
+        }
         catch (ArgumentException argEx)
         {
             logger.LogWarning(argEx, "Payment creation failed due to invalid input: {Message}", argEx.Message);
+            throw;
+        }
+        catch (AccountException ex)
+        {
+            logger.LogWarning(ex, "Payment creation failed due to invalid input: {Message}", ex.Message);
             throw;
         }
         catch (PaymentException)
@@ -177,12 +205,27 @@ public class PaymentService : BaseApplicationService, IPaymentService
             throw new ArgumentNullException(nameof(payment), "Payment details cannot be null.");
         }
 
-        ValidatePayment(payment, cancellationToken);
+        var validationResult = await ValidatePaymentAsync(payment, cancellationToken);
+
+        if (validationResult.Count > 0)
+        {
+            throw new ValidationException("Payment input validation failed.", validationResult);
+        }
+
+        var beneficiaryAccount = await GetOrCreateAccountAsync(payment.BeneficiaryAccount, cancellationToken);
+
+        var originatorAccount = await GetOrCreateAccountAsync(payment.OriginatorAccount, cancellationToken);
 
         var paymentEntity = mapper.Map<CreatePaymentDto, Payment>(payment);
 
+        paymentEntity.BeneficiaryAccountId = beneficiaryAccount.Id;
+
+        paymentEntity.OriginatorAccountId = originatorAccount.Id;
+
         await dbContext.Payments.AddAsync(paymentEntity, cancellationToken);
+
         await dbContext.SaveChangesAsync(cancellationToken);
+
         await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
 
         logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentEntity.Id);
@@ -231,32 +274,56 @@ public class PaymentService : BaseApplicationService, IPaymentService
         return payments;
     }
 
+
     /// <summary>
-    /// Validates provided payment details to ensure they meet the required criteria.
+    /// Retrieves an existing account by matching criteria or creates a new account if one does not exist.
     /// </summary>
-    /// <param name="payment">The payment data to be validated.</param>
+    /// <param name="createAccount">The account details to search or create.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <exception cref="ArgumentNullException">Thrown when the payment or any required property of the payment is null or empty.</exception>
-    private void ValidatePayment(CreatePaymentDto payment, CancellationToken cancellationToken)
+    /// <returns>A task that represents the asynchronous operation. The task result contains the account details.</returns>
+    private async Task<AccountDto> GetOrCreateAccountAsync(CreateAccountDto createAccount,
+        CancellationToken cancellationToken)
+    {
+        var account = await dbContext.Accounts.Where(a=>a.Name.Contains(createAccount.Name) ||
+                                                        a.AccountNumber.Contains(createAccount.AccountNumber) ||
+                                                        a.Iban.Contains(createAccount.Iban)).FirstOrDefaultAsync(cancellationToken: cancellationToken);;
+
+        if (account == null)
+        {
+            account = mapper.Map<CreateAccountDto, Core.Account>(createAccount);
+            await dbContext.Accounts.AddAsync(account, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.Entry(account).ReloadAsync(cancellationToken);
+        }
+
+        return mapper.Map<Account, AccountDto>(account);
+    }
+
+    /// <summary>
+    /// Validates provided payment information, ensuring all required fields meet the expected criteria.
+    /// </summary>
+    /// <param name="payment">The payment data to validate, including originator and beneficiary account details, amount, date, reference number, and other related information.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A read-only list of validation error messages, if any, or an empty list if validation is successful.</returns>
+    private async Task<IReadOnlyList<string>> ValidatePaymentAsync(CreatePaymentDto payment,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        logger.LogInformation("Starting validation for payment: {ReferenceNumber}", payment.ReferenceNumber);
+        logger.LogInformation("Starting validation for payment: {ReferenceNumber}", payment?.ReferenceNumber);
 
-        if (string.IsNullOrEmpty(payment.ReferenceNumber))
+        var validationResult = await paymentValidator.ValidateAsync(payment, cancellationToken);
+
+        var errors = validationResult.Errors.Select(failure => failure.ErrorMessage).ToList();
+
+        if (errors.Count == 0)
         {
-            logger.LogWarning("Validation failed: Payment reference number cannot be null or empty.");
-            throw new ArgumentNullException(nameof(payment.ReferenceNumber), "Payment reference number cannot be null or empty.");
+            logger.LogDebug("Payment validation completed successfully.");
+        } else {
+            logger.LogWarning("Payment validation completed with {ErrorCount} errors. Details: {Errors}", errors.Count, string.Join("; ", errors));
         }
 
-        if (string.IsNullOrEmpty(payment.Details))
-        {
-            logger.LogWarning("Validation failed: Payment details cannot be null or empty.");
-            throw new ArgumentNullException(nameof(payment.Details), "Payment details cannot be null or empty.");
-        }
-
-        logger.LogDebug("Payment validation completed successfully.");
-
+        return errors.AsReadOnly();
     }
 
     #endregion

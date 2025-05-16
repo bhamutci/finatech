@@ -74,6 +74,39 @@ public class AccountService : BaseApplicationService, IAccountService
         }
     }
 
+    public async Task<AccountDto> GetAccountAsync(string name, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Attempting to retrieve account with ID: {Name}", name);
+        try
+        {
+            var accountEntity = await dbContext.Accounts.FirstOrDefaultAsync(a=>a.Name.Contains(name), cancellationToken: cancellationToken);
+
+            if (accountEntity == null)
+            {
+                logger.LogWarning("Account with ID: {Name} not found.", name);
+            }
+
+            return mapper.Map<AccountDto>(accountEntity);
+
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogWarning("GetAccountAsync for Name {Name} was cancelled.", name);
+            throw; // Re-throw the cancellation exception
+        }
+        catch (DbException dbEx)
+        {
+            logger.LogError(dbEx, "Database error while retrieving account with Name: {Name}", name); // Log database error
+            throw new AccountException($"Could not retrieve account with Name {name} due to a database error.",
+                dbEx);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An unexpected error occurred while retrieving account with Name: {Name}", name);
+            throw new AccountException($"An unexpected error occurred while retrieving account with Name {name}.", ex);
+        }
+    }
+
     /// <summary>
     /// Retrieves a paginated list of accounts based on the provided filter criteria.
     /// </summary>
@@ -294,6 +327,12 @@ public class AccountService : BaseApplicationService, IAccountService
         {
             logger.LogWarning("Validation failed: Account Address cannot be null or empty.");
             throw new ArgumentNullException(nameof(account.Address), "Account Address cannot be null or empty.");
+        }
+
+        if (string.IsNullOrEmpty(account.Address.AddressLine1))
+        {
+            logger.LogWarning("Validation failed: Account Address AddressLine1 cannot be null or empty.");
+            throw new ArgumentNullException(nameof(account.Address.AddressLine1), "Account Address AddressLine1 cannot be null or empty.");
         }
 
         if (string.IsNullOrEmpty(account.Address.CountryCode))

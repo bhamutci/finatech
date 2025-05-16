@@ -7,6 +7,11 @@ using Mapper;
 using EntityFramework;
 using Services.Account;
 using Services.Payment;
+using Services.Account.Dto;
+using Services.Account.Dto.Validator;
+using Services.Payment.Dto;
+using Services.Payment.Dto.Validator;
+using FluentValidation;
 
 /// <summary>
 /// Provides extension methods for configuring application-specific services in the dependency injection container.
@@ -23,6 +28,12 @@ public static class ApplicationModule
     {
         services.AddEntityFramework(configuration);
         services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
+
+        services.AddScoped<IValidator<CreateAccountDto>, CreateAccountDtoValidator>();
+        services.AddScoped<IValidator<CreatePaymentDto>, CreatePaymentDtoValidator>();
+        services.AddScoped<IValidator<AddressDto>, AddressDtoValidator>();
+        services.AddScoped<IValidator<MoneyDto>, MoneyDtoValidator>();
+
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IPaymentService, PaymentService>();
     }

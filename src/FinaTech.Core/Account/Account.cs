@@ -32,7 +32,7 @@ public sealed class Account
     /// Gets or sets the account number associated with the account entity.
     /// </summary>
     [StringLength(AccountConstants.MaxLengthOfAccountNumber)]
-    public string? AccountNumber { get; set; }
+    public string AccountNumber { get; set; }
 
     /// <summary>
     /// Gets or sets the International Bank Account Number (IBAN) associated with the account.
