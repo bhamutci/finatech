@@ -1,3 +1,5 @@
+using FinaTech.Core.Account;
+
 namespace FinaTech.Application.Services.Payment;
 
 using System.Data.Common;
@@ -12,7 +14,6 @@ using Dto;
 using Exceptions;
 using EntityFramework.PostgresSqlServer;
 using FinaTech.Application.Services.Dto;
-using FinaTech.Application.Services.Account.Dto;
 
 /// <summary>
 /// Service for handling operations related to payments in the FinaTech application.
@@ -111,11 +112,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
             var paymentDtos =
                 mapper.Map<IReadOnlyList<Payment>, IReadOnlyList<PaymentDto>>(payments);
 
-            var pagedResultDto = new PagedResultDto<PaymentDto>
-            {
-                Items = paymentDtos,
-                TotalCount = totalCount
-            };
+            var pagedResultDto = new PagedResultDto<PaymentDto>(paymentDtos, totalCount);
 
             logger.LogInformation("Retrieved {PaymentCount} payments out of {TotalCount} total payments.",
                 paymentDtos.Count, totalCount);
@@ -167,14 +164,10 @@ public class PaymentService : BaseApplicationService, IPaymentService
             logger.LogWarning(argEx, "Payment creation failed due to invalid input: {Message}", argEx.Message);
             throw;
         }
-        catch (AccountException ex)
+        catch (PaymentException ex)
         {
             logger.LogWarning(ex, "Payment creation failed due to invalid input: {Message}", ex.Message);
             throw;
-        }
-        catch (PaymentException)
-        {
-             throw;
         }
         catch (Exception ex)
         {

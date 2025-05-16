@@ -1,11 +1,11 @@
+using FinaTech.Core.Account;
+
 namespace FinaTech.Application.Mapper;
 
 using AutoMapper;
 
 using Core;
 using Services.Payment.Dto;
-using Services.Account.Dto;
-
 public class DtoAutoMapperProfile: Profile
 {
     /// <summary>
@@ -29,9 +29,8 @@ public class DtoAutoMapperProfile: Profile
     private void AddressProfile()
     {
         CreateMap<Address, AddressDto>()
-            .MaxDepth(1)
-            .ReverseMap()
             .MaxDepth(1);
+        CreateMap<CreateAddressDto, Address>();
     }
 
     /// <summary>

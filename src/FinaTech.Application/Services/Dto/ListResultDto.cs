@@ -1,21 +1,13 @@
 namespace FinaTech.Application.Services.Dto;
 
-public class ListResultDto<T>: IListResult<T>
+/// <summary>
+/// Represents a result containing a list of items.
+/// </summary>
+/// <typeparam name="T">The type of the items in the list.</typeparam>
+public class ListResultDto<T> : IListResult<T>
 {
-    public IReadOnlyList<T> Items
-    {
-        get { return _items ??= new List<T>(); }
-        set => _items = value;
-    }
-    private IReadOnlyList<T> _items;
+    public IReadOnlyList<T> Items { get; set; }
 
-    /// <summary>
-    /// Creates a new <see cref="ListResultDto{T}"/> object.
-    /// </summary>
-    protected ListResultDto()
-    {
-
-    }
 
     /// <summary>
     /// Creates a new <see cref="ListResultDto{T}"/> object.

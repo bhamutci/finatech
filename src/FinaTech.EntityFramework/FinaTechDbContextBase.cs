@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using FinaTech.Core;
+using FinaTech.Core.Account;
 
 namespace FinaTech.EntityFramework;
 
@@ -21,7 +22,7 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
 
   /// <summary>
   /// Gets or sets the database set for accounts, enabling CRUD operations
-  /// on the <see cref="FinaTech.Core.Account"/> entities stored in the database.
+  /// on the <see cref="Account"/> entities stored in the database.
   /// </summary>
   public DbSet<Account> Accounts { get; set; }
 

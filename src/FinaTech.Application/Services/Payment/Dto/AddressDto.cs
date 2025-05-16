@@ -1,4 +1,4 @@
-namespace FinaTech.Application.Services.Account.Dto;
+namespace FinaTech.Application.Services.Payment.Dto;
 
 public record AddressDto(
     int Id,

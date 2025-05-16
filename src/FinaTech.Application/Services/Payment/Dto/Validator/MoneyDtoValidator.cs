@@ -15,7 +15,7 @@ public class MoneyDtoValidator: AbstractValidator<MoneyDto>
 
         RuleFor(money => money.Currency)
             .NotEmpty().WithMessage("Money value cannot be null or empty.")
-            .Length(2).WithMessage("Money currency must be 3 letters.");
+            .Length(3).WithMessage("Money currency must be 3 letters.");
 
     }
 }

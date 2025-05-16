@@ -1,15 +1,15 @@
 namespace FinaTech.Application.Services.Dto;
 
 /// <summary>
-/// Defines a request interface for obtaining paginated results.
+/// Defines a request interface for getting paginated results.
 /// </summary>
-public class IFilter
+public class Filter
 {
     /// <summary>
     /// Gets or sets the keywords used for searching or filtering data.
     /// This property is typically employed to refine the results based on specific terms or phrases.
     /// </summary>
-    public string Keywords { get; set; }
+    public string? Keywords { get; set; }
 
     /// <summary>
     /// Gets or sets the number of items to skip before starting to retrieve results.

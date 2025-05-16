@@ -1,3 +1,5 @@
+using FinaTech.Core.Account;
+
 namespace FinaTech.Core;
 
 /// <summary>

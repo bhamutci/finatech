@@ -1,6 +1,7 @@
-namespace FinaTech.Application.Services.Account.Dto.Validator;
+namespace FinaTech.Application.Services.Payment.Dto.Validator;
 
 using FluentValidation;
+
 
 /// <summary>
 /// Provides validation rules for the <see cref="CreateAccountDto"/> object.

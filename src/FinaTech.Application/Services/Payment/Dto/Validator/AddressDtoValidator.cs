@@ -1,4 +1,4 @@
-namespace FinaTech.Application.Services.Account.Dto.Validator;
+namespace FinaTech.Application.Services.Payment.Dto.Validator;
 
 using FluentValidation;
 
@@ -8,11 +8,11 @@ using FluentValidation;
 /// </summary>
 /// <remarks>
 /// The validator includes:
-/// - Ensuring the primary address line (<see cref="AddressDto.AddressLine1"/>) is not empty or null.
-/// - Verifying that the country code (<see cref="AddressDto.CountryCode"/>) is a non-null, non-empty,
+/// - Ensuring the primary address line (<see cref="CreateAddressDto.AddressLine1"/>) is not empty or null.
+/// - Verifying that the country code (<see cref="CreateAddressDto.CountryCode"/>) is a non-null, non-empty,
 /// two-letter string adhering to standardized country code formats.
 /// </remarks>
-public class AddressDtoValidator: AbstractValidator<AddressDto>
+public class AddressDtoValidator: AbstractValidator<CreateAddressDto>
 {
     public AddressDtoValidator()
     {

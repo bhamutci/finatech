@@ -1,4 +1,4 @@
-namespace FinaTech.Core;
+namespace FinaTech.Core.Account;
 
 using System.ComponentModel.DataAnnotations;
 
@@ -26,25 +26,28 @@ public sealed class Account
     /// </summary>
     [Required]
     [StringLength(AccountConstants.MaxLengthOfName)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// Gets or sets the account number associated with the account entity.
     /// </summary>
+    [Required]
     [StringLength(AccountConstants.MaxLengthOfAccountNumber)]
-    public string AccountNumber { get; set; }
+    public required string AccountNumber { get; set; }
 
     /// <summary>
     /// Gets or sets the International Bank Account Number (IBAN) associated with the account.
     /// </summary>
+    [Required]
     [StringLength(AccountConstants.MaxLengthOfIban)]
-    public string Iban { get; set; }
+    public required string Iban { get; set; }
 
     /// <summary>
     /// Gets or sets the International Bank Account Number (IBAN) associated with the account.
     /// </summary>
+    [Required]
     [StringLength(AccountConstants.MaxLengthOfBic)]
-    public string Bic { get; set; }
+    public required string Bic { get; set; }
 
     /// <summary>
     /// Gets or sets the address associated with the account entity.

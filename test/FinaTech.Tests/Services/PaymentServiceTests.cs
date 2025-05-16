@@ -1,118 +1,73 @@
 namespace FinaTech.Tests.Services;
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-
-using AutoMapper;
-using FluentValidation;
-using NUnit.Framework;
-using NUnit.Framework.Legacy;
-
-
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+using FluentValidation;
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
+using AutoMapper;
+
 using Core;
+using Core.Account;
 using Application.Mapper;
 using EntityFramework.PostgresSqlServer;
-using FinaTech.Application.Services.Payment.Dto;
-using FinaTech.Application.Services.Account.Dto;
 using FinaTech.Application.Services.Payment;
+using FinaTech.Application.Services.Payment.Dto;
+using FinaTech.Application.Services.Payment.Dto.Validator;
 
 [TestFixture]
 public class PaymentServiceTests
 {
     private FinaTechPostgresSqlDbContext _dbContext;
-    private IMapper _mapper;
-    private ILogger<PaymentService> _logger;
-    private PaymentService _paymentService;
-    private IValidator<CreatePaymentDto?> _validator;
-    private static readonly Address Address = new() {Id = 1, CountryCode = "GB", AddressLine1 = "Test St"};
-    private static readonly AddressDto AddressDto = new(1,"Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
+    private IPaymentService _paymentService;
+    private static readonly CreateAddressDto BeneficiaryAccountAddress = new("Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
+    private static readonly CreateAddressDto OriginatorAccountAddress = new("Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
 
-    private List<Payment> GetSamplePayments(int count, int startId = 1)
-    {
-        var payments = new List<Payment>();
+    private static readonly CreateAccountDto BeneficiaryAccount = new CreateAccountDto
+        ("BeneficiaryAccount", "GB12FINA1234567890", "BIC0001", "12344", BeneficiaryAccountAddress);
+    private static readonly CreateAccountDto OriginatorAccount =
+        new("OriginatorAccount", "GB12FINA1234567891", "BIC0001", "12345", OriginatorAccountAddress);
 
-        Account beneficiaryAccount = new Account
-        {
-            Id = 123,
-            AddressId = Address.Id,
-            Name = "BeneficiaryAccount",
-            AccountNumber = "12344",
-            Iban = "GB12FINA1234567890",
-            Bic="BIC0001",
-            Address = Address,
-        };
-
-        Account originatorAccount = new Account
-        {
-            Id = 124,
-            AddressId = Address.Id,
-            Name = "OriginatorAccount",
-            AccountNumber = "12345",
-            Iban = "GB12FINA1234567891",
-            Bic = "BIC0001",
-            Address = Address,
-        };
-
-        for (int i = 0; i < count; i++)
-        {
-            var id = startId + i;
-            payments.Add(new Payment
-            {
-                Id = id,
-                ReferenceNumber = $"REF{id.ToString().PadLeft(5, '0')}",
-                Details = $"Details for payment {id}",
-                Amount = new Money(10,
-                    "GB"),
-                BeneficiaryAccountId = beneficiaryAccount.Id,
-                OriginatorAccountId = originatorAccount.Id,
-                Date = DateTimeOffset.Now,
-                ChargesBearer = (int)ChargesBearer.Originator,
-                OriginatorAccount = originatorAccount,
-                BeneficiaryAccount = beneficiaryAccount
-            });
-        }
-
-        return payments;
-    }
+    private ServiceProvider _serviceProvider;
 
     [SetUp]
     public void Setup()
     {
-        var serviceProvider = new ServiceCollection()
+        _serviceProvider = new ServiceCollection()
             .AddLogging()
             .AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly)
             .AddDbContext<FinaTechPostgresSqlDbContext>(options => options.UseInMemoryDatabase("ServicesDB"))
+            .AddScoped<IValidator<CreateAccountDto>, CreateAccountDtoValidator>()
+            .AddScoped<IValidator<CreatePaymentDto>, CreatePaymentDtoValidator>()
+            .AddScoped<IValidator<CreateAddressDto>, AddressDtoValidator>()
+            .AddScoped<IPaymentService, PaymentService>()
             .BuildServiceProvider();
 
-        var factory = serviceProvider.GetService<ILoggerFactory>();
+        _dbContext = _serviceProvider.GetService<FinaTechPostgresSqlDbContext>();
+        _paymentService = _serviceProvider.GetService<IPaymentService>();
 
-        _logger = factory.CreateLogger<PaymentService>();
-        _mapper = serviceProvider.GetService<IMapper>();
-        _dbContext = serviceProvider.GetService<FinaTechPostgresSqlDbContext>();
-        _validator = serviceProvider.GetService<IValidator<CreatePaymentDto>>();
-
-        _paymentService = new PaymentService(_dbContext, _mapper, _logger, _validator);
     }
 
     [TearDown]
     public void TearDown()
     {
-        _dbContext.Database.EnsureDeleted();
+        _dbContext?.Database.EnsureDeleted();
         _dbContext?.Dispose();
+        _serviceProvider.Dispose();
     }
 
     [Test]
     public async Task GetPaymentAsync_ShouldReturnPaymentDto_WhenPaymentFound()
     {
         var paymentId = 50;
-        var samplePayment = GetSamplePayments(1, paymentId).Single(); // Get a single payment with specific ID
+        var samplePayment = GetSamplePayments(1, paymentId).Single();
 
         _dbContext.Payments.Add(samplePayment);
         await _dbContext.SaveChangesAsync();
@@ -121,11 +76,11 @@ public class PaymentServiceTests
 
         var resultDto = await _paymentService.GetPaymentAsync(paymentId, cancellationToken);
 
-        ClassicAssert.NotNull(resultDto);
-        ClassicAssert.AreEqual(paymentId, resultDto.Id);
-        ClassicAssert.AreEqual(samplePayment.ReferenceNumber, resultDto.ReferenceNumber);
-        ClassicAssert.AreEqual(samplePayment.Amount.Value, resultDto.Amount.Value);
-        ClassicAssert.AreEqual(samplePayment.Amount.Currency, resultDto.Amount.Currency);
+        Assert.That(resultDto, Is.Not.Null);
+        Assert.That(resultDto.Id, Is.EqualTo(paymentId));
+        Assert.That(resultDto.ReferenceNumber, Is.EqualTo(samplePayment.ReferenceNumber));
+        Assert.That(resultDto.Amount.Value, Is.EqualTo(samplePayment.Amount.Value));
+        Assert.That(resultDto.Amount.Currency, Is.EqualTo(samplePayment.Amount.Currency));
     }
 
     [Test]
@@ -135,8 +90,7 @@ public class PaymentServiceTests
         var cancellationToken = CancellationToken.None;
 
         var result = await _paymentService.GetPaymentAsync(nonExistentPaymentId, cancellationToken);
-
-        ClassicAssert.Null(result);
+        Assert.That(result, Is.Null);
     }
 
     [Test]
@@ -161,16 +115,16 @@ public class PaymentServiceTests
 
         var result = await _paymentService.GetPaymentsAsync(paymentFilter, cancellationToken);
 
-        ClassicAssert.NotNull(result);
-        ClassicAssert.NotNull(result.Items);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Items, Is.Not.Null);
 
-        ClassicAssert.AreEqual(totalNumberOfPayments, result.TotalCount);
-        ClassicAssert.AreEqual(maxResultCount, result.Items.Count);
+        Assert.That(result.TotalCount, Is.EqualTo(totalNumberOfPayments));
+        Assert.That(result.Items.Count, Is.EqualTo(maxResultCount));
 
         var expectedIdsInPage = samplePayments.Skip(skipCount).Take(maxResultCount).Select(p => p.Id).ToList();
         var actualIdsInPage = result.Items.Select(dto => dto.Id).ToList();
 
-        CollectionAssert.AreEquivalent(expectedIdsInPage, actualIdsInPage);
+        Assert.That(actualIdsInPage, Is.EquivalentTo(expectedIdsInPage));
     }
 
     [Test]
@@ -205,16 +159,15 @@ public class PaymentServiceTests
         var cancellationToken = CancellationToken.None;
 
         var result = await _paymentService.GetPaymentsAsync(paymentFilter, cancellationToken);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Items, Is.Not.Null);
 
-        ClassicAssert.NotNull(result);
-        ClassicAssert.NotNull(result.Items);
-
-        ClassicAssert.AreEqual(expectedFilteredCount, result.TotalCount);
-        ClassicAssert.AreEqual(expectedFilteredCount, result.Items.Count);
+        Assert.That(result.TotalCount, Is.EqualTo(expectedFilteredCount));
+        Assert.That(result.Items.Count, Is.EqualTo(expectedFilteredCount));
 
         var expectedFilteredIds = expectedFilteredPayments.Select(p => p.Id).ToList();
         var actualFilteredIds = result.Items.Select(dto => dto.Id).ToList();
-        CollectionAssert.AreEquivalent(expectedFilteredIds, actualFilteredIds);
+        Assert.That(actualFilteredIds, Is.EquivalentTo(expectedFilteredIds));
     }
 
     [Test]
@@ -234,24 +187,17 @@ public class PaymentServiceTests
         var cancellationToken = CancellationToken.None;
 
         var result = await _paymentService.GetPaymentsAsync(paymentFilter, cancellationToken);
-
-        ClassicAssert.NotNull(result);
-        ClassicAssert.NotNull(result.Items);
-
-        ClassicAssert.AreEqual(0, result.TotalCount);
-        ClassicAssert.AreEqual(0, result.Items.Count);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Items, Is.Not.Null);
+        Assert.That(result.TotalCount, Is.EqualTo(0));
+        Assert.That(result.Items.Count, Is.EqualTo(0));
 
     }
 
     [Test]
     public async Task CreatePaymentAsync_ShouldCreatePayment_WhenValidInput()
     {
-        CreateAccountDto beneficiaryAccount = new CreateAccountDto("BeneficiaryAccount", "GB12FINA1234567891", "BIC0001", "12345", AddressDto);
-
-        CreateAccountDto originatorAccount =
-            new CreateAccountDto("OriginatorAccount", "GB12FINA1234567891", "BIC0001", "12345", AddressDto);
-
-        var validCreatePaymentDto = new CreatePaymentDto(originatorAccount, beneficiaryAccount, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var validCreatePaymentDto = new CreatePaymentDto(OriginatorAccount, BeneficiaryAccount, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "Initial payment details", "NEWREF123");
 
         var cancellationToken = CancellationToken.None;
@@ -260,29 +206,52 @@ public class PaymentServiceTests
         ClassicAssert.NotNull(createdPaymentDto);
         ClassicAssert.That(createdPaymentDto.Id, Is.GreaterThan(0));
 
-        ClassicAssert.AreEqual(validCreatePaymentDto.ReferenceNumber, createdPaymentDto.ReferenceNumber);
-        ClassicAssert.AreEqual(validCreatePaymentDto.Amount, createdPaymentDto.Amount);
+        Assert.That(createdPaymentDto.ReferenceNumber, Is.EqualTo(validCreatePaymentDto.ReferenceNumber));
+        Assert.That(createdPaymentDto.Amount, Is.EqualTo(validCreatePaymentDto.Amount));
 
         var paymentInDb = await _dbContext.Payments.FindAsync([createdPaymentDto.Id], cancellationToken);
-        ClassicAssert.NotNull(paymentInDb);
-        ClassicAssert.AreEqual(validCreatePaymentDto.ReferenceNumber, paymentInDb.ReferenceNumber);
+        Assert.That(paymentInDb, Is.Not.Null);
+        Assert.That(paymentInDb?.ReferenceNumber, Is.EqualTo(validCreatePaymentDto.ReferenceNumber));
     }
 
     [Test]
-    public async Task CreatePaymentAsync_ShouldThrowArgumentNullException_WhenValidationFails()
+    public async Task CreatePaymentAsync_ShouldThrowValidationException_WhenValidationFails()
     {
-        var invalidCreatePaymentDto = new CreatePaymentDto(null, null, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var invalidCreatePaymentDto = new CreatePaymentDto(null, BeneficiaryAccount, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "NEWREF123", null);
 
         var cancellationToken = CancellationToken.None;
 
-        var thrownException = Assert.ThrowsAsync<ArgumentNullException>(async () =>
+        var thrownException = Assert.ThrowsAsync<Application.Exceptions.ValidationException>(async () =>
             await _paymentService.CreatePaymentAsync(invalidCreatePaymentDto, cancellationToken)
         );
 
-        ClassicAssert.That(thrownException.Message, Contains.Substring("Payment reference number cannot be null or empty. (Parameter 'ReferenceNumber')"));
+        Assert.That(thrownException.Message, Contains.Substring("Payment input validation failed."));
 
         var paymentCountAfter = await _dbContext.Payments.CountAsync(cancellationToken);
-        ClassicAssert.AreEqual(0, paymentCountAfter);
+        Assert.That(paymentCountAfter, Is.EqualTo(0));
+    }
+
+    private List<Payment> GetSamplePayments(int count, int startId = 1)
+    {
+        var payments = new List<Payment>();
+        var mapper = _serviceProvider.GetService<IMapper>();
+        for (int i = 0; i < count; i++)
+        {
+            var id = startId + i;
+            payments.Add(new Payment
+            {
+                Id = id,
+                ReferenceNumber = $"REF{id.ToString().PadLeft(5, '0')}",
+                Details = $"Details for payment {id}",
+                Amount = new Money(10,"GB"),
+                Date = DateTimeOffset.Now,
+                ChargesBearer = (int)ChargesBearer.Originator,
+                OriginatorAccount =  mapper?.Map<CreateAccountDto, Account>(OriginatorAccount) ,
+                BeneficiaryAccount = mapper?.Map<CreateAccountDto, Account>(BeneficiaryAccount)
+            });
+        }
+
+        return payments;
     }
 }

@@ -1,7 +1,6 @@
 namespace FinaTech.Application.Services.Payment.Dto.Validator;
 
 using FluentValidation;
-using FinaTech.Application.Services.Account.Dto.Validator;
 
 /// <summary>
 /// Provides validation rules for the <see cref="CreatePaymentDto"/> object.
@@ -29,13 +28,9 @@ public class CreatePaymentDtoValidator: AbstractValidator<CreatePaymentDto>
             .NotEmpty()
             .WithMessage("Payment details cannot be null or empty.");
 
-        RuleFor(payment => payment.Amount.Value)
-            .GreaterThan(0)
-            .WithMessage("Payment amount must be greater than zero.");
-
-         RuleFor(payment => payment.Amount.Currency)
-             .NotEmpty().WithMessage("Payment currency cannot be null or empty.")
-             .Length(3).WithMessage("Payment currency must be a 3-letter code.");
+        RuleFor(payment => payment.Amount)
+            .NotNull().WithMessage("Payment amount cannot be null.")
+            .SetValidator(new MoneyDtoValidator());
 
         RuleFor(payment => payment.BeneficiaryAccount)
             .NotNull().WithMessage("Payment beneficiary account cannot be null.")

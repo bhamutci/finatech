@@ -7,7 +7,7 @@ using FinaTech.Application.Services.Dto;
 /// such as beneficiary and originator account identifiers, as well as keywords,
 /// skip count, and maximum result count via the ILimitedResult interface.
 /// </summary>
-public class PaymentFilter : IFilter
+public class PaymentFilter : Filter
 {
     /// <summary>
     /// Gets or sets the identifier for the beneficiary's account.
