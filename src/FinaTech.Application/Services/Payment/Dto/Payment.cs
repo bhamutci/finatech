@@ -3,11 +3,11 @@ namespace FinaTech.Application.Services.Payment.Dto;
 /// <summary>
 /// Represents a Data Transfer Object (DTO) for a payment.
 /// </summary>
-public record PaymentDto(
+public record Payment(
     int Id,
-    int OriginatorAccountId,
-    int BeneficiaryAccountId,
-    MoneyDto Amount,
+    Account OriginatorAccount,
+    Account BeneficiaryAccount,
+    Money Amount,
     DateTimeOffset Date,
     ChargesBearer ChargesBearer,
     string? Details,

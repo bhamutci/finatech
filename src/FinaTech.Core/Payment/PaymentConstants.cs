@@ -15,5 +15,5 @@ public static class PaymentConstants
     /// <summary>
     /// Defines the maximum allowed length for a currency code in payment-related operations.
     /// </summary>
-    public const int MaxLengthOfCurrency = 2;
+    public const int MaxLengthOfCurrency = 3;
 }

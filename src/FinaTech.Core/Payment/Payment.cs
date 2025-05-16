@@ -53,7 +53,7 @@ public sealed class Payment
     public Account.Account? BeneficiaryAccount { get; set; }
 
     /// <summary>
-    /// Gets or sets the charges bearer for the payment transaction.
+    /// Gets or sets the charge bearer for the payment transaction.
     /// Indicates who is responsible for bearing the transaction charges (Originator, Beneficiary, or Shared).
     /// </summary>
     public required int ChargesBearer { get; set; }

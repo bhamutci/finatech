@@ -27,12 +27,12 @@ public class PaymentServiceTests
 {
     private FinaTechPostgresSqlDbContext _dbContext;
     private IPaymentService _paymentService;
-    private static readonly CreateAddressDto BeneficiaryAccountAddress = new("Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
-    private static readonly CreateAddressDto OriginatorAccountAddress = new("Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
+    private static readonly CreateAddress BeneficiaryAccountAddress = new("Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
+    private static readonly CreateAddress OriginatorAccountAddress = new("Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
 
-    private static readonly CreateAccountDto BeneficiaryAccount = new CreateAccountDto
+    private static readonly CreateAccount BeneficiaryAccount = new CreateAccount
         ("BeneficiaryAccount", "GB12FINA1234567890", "BIC0001", "12344", BeneficiaryAccountAddress);
-    private static readonly CreateAccountDto OriginatorAccount =
+    private static readonly CreateAccount OriginatorAccount =
         new("OriginatorAccount", "GB12FINA1234567891", "BIC0001", "12345", OriginatorAccountAddress);
 
     private ServiceProvider _serviceProvider;
@@ -44,9 +44,9 @@ public class PaymentServiceTests
             .AddLogging()
             .AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly)
             .AddDbContext<FinaTechPostgresSqlDbContext>(options => options.UseInMemoryDatabase("ServicesDB"))
-            .AddScoped<IValidator<CreateAccountDto>, CreateAccountDtoValidator>()
-            .AddScoped<IValidator<CreatePaymentDto>, CreatePaymentDtoValidator>()
-            .AddScoped<IValidator<CreateAddressDto>, AddressDtoValidator>()
+            .AddScoped<IValidator<CreateAccount>, CreateAccountDtoValidator>()
+            .AddScoped<IValidator<CreatePayment>, CreatePaymentDtoValidator>()
+            .AddScoped<IValidator<CreateAddress>, AddressDtoValidator>()
             .AddScoped<IPaymentService, PaymentService>()
             .BuildServiceProvider();
 
@@ -197,7 +197,7 @@ public class PaymentServiceTests
     [Test]
     public async Task CreatePaymentAsync_ShouldCreatePayment_WhenValidInput()
     {
-        var validCreatePaymentDto = new CreatePaymentDto(OriginatorAccount, BeneficiaryAccount, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var validCreatePaymentDto = new CreatePayment(OriginatorAccount, BeneficiaryAccount, new Application.Services.Payment.Dto.Money(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "Initial payment details", "NEWREF123");
 
         var cancellationToken = CancellationToken.None;
@@ -217,7 +217,7 @@ public class PaymentServiceTests
     [Test]
     public async Task CreatePaymentAsync_ShouldThrowValidationException_WhenValidationFails()
     {
-        var invalidCreatePaymentDto = new CreatePaymentDto(null, BeneficiaryAccount, new MoneyDto(250.75m, "EUR"), DateTimeOffset.Now,
+        var invalidCreatePaymentDto = new CreatePayment(null, BeneficiaryAccount, new Application.Services.Payment.Dto.Money(250.75m, "EUR"), DateTimeOffset.Now,
             ChargesBearer.Shared, "NEWREF123", null);
 
         var cancellationToken = CancellationToken.None;
@@ -232,23 +232,23 @@ public class PaymentServiceTests
         Assert.That(paymentCountAfter, Is.EqualTo(0));
     }
 
-    private List<Payment> GetSamplePayments(int count, int startId = 1)
+    private List<Core.Payment> GetSamplePayments(int count, int startId = 1)
     {
-        var payments = new List<Payment>();
+        var payments = new List<Core.Payment>();
         var mapper = _serviceProvider.GetService<IMapper>();
         for (int i = 0; i < count; i++)
         {
             var id = startId + i;
-            payments.Add(new Payment
+            payments.Add(new Core.Payment
             {
                 Id = id,
                 ReferenceNumber = $"REF{id.ToString().PadLeft(5, '0')}",
                 Details = $"Details for payment {id}",
-                Amount = new Money(10,"GB"),
+                Amount = new Core.Money(10,"GB"),
                 Date = DateTimeOffset.Now,
                 ChargesBearer = (int)ChargesBearer.Originator,
-                OriginatorAccount =  mapper?.Map<CreateAccountDto, Account>(OriginatorAccount) ,
-                BeneficiaryAccount = mapper?.Map<CreateAccountDto, Account>(BeneficiaryAccount)
+                OriginatorAccount =  mapper?.Map<CreateAccount, Core.Account.Account>(OriginatorAccount) ,
+                BeneficiaryAccount = mapper?.Map<CreateAccount, Core.Account.Account>(BeneficiaryAccount)
             });
         }
 

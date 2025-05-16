@@ -1,9 +1,9 @@
 namespace FinaTech.Application.Services.Payment.Dto;
 
-public record CreatePaymentDto(
-    CreateAccountDto OriginatorAccount,
-    CreateAccountDto BeneficiaryAccount,
-    MoneyDto Amount,
+public record CreatePayment(
+    CreateAccount OriginatorAccount,
+    CreateAccount BeneficiaryAccount,
+    Money Amount,
     DateTimeOffset? Date,
     ChargesBearer? ChargesBearer,
     string? Details,

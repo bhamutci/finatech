@@ -2,7 +2,7 @@ namespace FinaTech.Application.Services.Strategy;
 
 using Payment.Dto;
 
-public class SWIFTPayment(PaymentDto payment) : PaymentStrategy(payment)
+public class SWIFTPayment(Payment payment) : PaymentStrategy(payment)
 {
     protected override void Process()
     {

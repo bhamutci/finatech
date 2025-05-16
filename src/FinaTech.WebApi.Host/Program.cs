@@ -39,23 +39,24 @@ app.MapGet("/payments/{id:int}", async (int id, IPaymentService paymentService, 
 })
 .WithName("GetPayment")
 .WithTags("Payment")
-.Produces<PaymentDto>()
+.Produces<Payment>()
 .Produces(StatusCodes.Status404NotFound)
 .Produces(StatusCodes.Status499ClientClosedRequest)
 .Produces(StatusCodes.Status500InternalServerError);
 
-app.MapPost("/payments", async (IPaymentService paymentService, CreatePaymentDto payment, CancellationToken cancellationToken) =>
+app.MapPost("/payments", async (IPaymentService paymentService, CreatePayment payment, CancellationToken cancellationToken) =>
 {
     var createdPayment = await paymentService.CreatePaymentAsync(payment, cancellationToken);
     return Results.Created($"/payments/{createdPayment.Id}", createdPayment);
 })
 .WithName("Create")
 .WithTags("Payment")
-.Produces<PaymentDto>(StatusCodes.Status201Created) // Document 201 response
-.Produces(StatusCodes.Status400BadRequest) // Document validation errors
-.Produces(StatusCodes.Status409Conflict) // Document resource already exists error
-.Produces(StatusCodes.Status499ClientClosedRequest) // Document cancellation
-.Produces(StatusCodes.Status500InternalServerError); // Document potential 500 errors
+.Produces<Payment>(StatusCodes.Status201Created)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status409Conflict)
+.Produces(StatusCodes.Status499ClientClosedRequest)
+.Produces(StatusCodes.Status500InternalServerError);
 
 app.Run();
+
 

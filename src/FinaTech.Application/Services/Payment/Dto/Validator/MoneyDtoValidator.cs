@@ -3,10 +3,10 @@ namespace FinaTech.Application.Services.Payment.Dto.Validator;
 using FluentValidation;
 
 /// <summary>
-/// Validator for the <see cref="MoneyDto"/> class.
+/// Validator for the <see cref="Money"/> class.
 /// Ensures that the MoneyDto fields meet the defined validation rules.
 /// </summary>
-public class MoneyDtoValidator: AbstractValidator<MoneyDto>
+public class MoneyDtoValidator: AbstractValidator<Money>
 {
     public MoneyDtoValidator()
     {

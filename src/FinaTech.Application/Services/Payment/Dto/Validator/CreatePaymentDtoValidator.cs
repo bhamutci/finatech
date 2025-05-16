@@ -3,7 +3,7 @@ namespace FinaTech.Application.Services.Payment.Dto.Validator;
 using FluentValidation;
 
 /// <summary>
-/// Provides validation rules for the <see cref="CreatePaymentDto"/> object.
+/// Provides validation rules for the <see cref="CreatePayment"/> object.
 /// Ensures required fields are present and meet specific criteria such as format and value constraints.
 /// </summary>
 /// <remarks>
@@ -12,7 +12,7 @@ using FluentValidation;
 /// - Validating the payment amount is greater than zero and the currency is a valid 3-letter ISO 4217 currency code.
 /// - Ensuring both originator and beneficiary accounts are non-null and valid using the <see cref="CreateAccountDtoValidator"/>.
 /// </remarks>
-public class CreatePaymentDtoValidator: AbstractValidator<CreatePaymentDto>
+public class CreatePaymentDtoValidator: AbstractValidator<CreatePayment>
 {
     public CreatePaymentDtoValidator()
     {

@@ -1,9 +1,7 @@
 namespace FinaTech.Application.Services.Payment.Dto;
 
-/// <summary>
-/// Represents the data transfer object for creating an address.
-/// </summary>
-public record CreateAddressDto(
+public record Address(
+    int Id,
     string AddressLine1,
     string? AddressLine2,
     string? AddressLine3,
@@ -11,4 +9,5 @@ public record CreateAddressDto(
     string? PostCode,
     string CountryCode)
 {
+
 }

@@ -3,7 +3,7 @@ namespace FinaTech.Application.Services.Strategy;
 using Payment.Dto;
 
 
-public class SEPAPayment(PaymentDto payment) : PaymentStrategy(payment)
+public class SEPAPayment(Payment payment) : PaymentStrategy(payment)
 {
     protected override void Process()
     {

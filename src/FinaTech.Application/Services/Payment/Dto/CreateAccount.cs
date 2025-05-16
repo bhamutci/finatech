@@ -1,10 +1,10 @@
 namespace FinaTech.Application.Services.Payment.Dto;
 
-public record CreateAccountDto(
+public record CreateAccount(
     string Name,
     string Iban,
     string Bic,
     string AccountNumber,
-    CreateAddressDto Address)
+    CreateAddress Address)
 {
 }

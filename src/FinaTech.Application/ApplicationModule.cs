@@ -26,10 +26,10 @@ public static class ApplicationModule
         services.AddEntityFramework(configuration);
         services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
 
-        services.AddScoped<IValidator<CreateAccountDto>, CreateAccountDtoValidator>();
-        services.AddScoped<IValidator<CreatePaymentDto>, CreatePaymentDtoValidator>();
-        services.AddScoped<IValidator<CreateAddressDto>, AddressDtoValidator>();
-        services.AddScoped<IValidator<MoneyDto>, MoneyDtoValidator>();
+        services.AddScoped<IValidator<CreateAccount>, CreateAccountDtoValidator>();
+        services.AddScoped<IValidator<CreatePayment>, CreatePaymentDtoValidator>();
+        services.AddScoped<IValidator<CreateAddress>, AddressDtoValidator>();
+        services.AddScoped<IValidator<Money>, MoneyDtoValidator>();
         services.AddScoped<IPaymentService, PaymentService>();
     }
 }

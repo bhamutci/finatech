@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Core", "src\FinaTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.EntityFramework", "src\FinaTech.EntityFramework\FinaTech.EntityFramework.csproj", "{4A86E2D0-E389-4306-8695-D1413A36E792}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Web.Host", "src\FinaTech.Web.Host\FinaTech.Web.Host.csproj", "{31D19594-B341-4039-88DC-F40CF58D73A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.WebApi.Host", "src\FinaTech.WebApi.Host\FinaTech.WebApi.Host.csproj", "{31D19594-B341-4039-88DC-F40CF58D73A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Web.Blazor", "src\FinaTech.Web.Blazor\FinaTech.Web.Blazor.csproj", "{0545CD03-DC72-4D59-B321-34D3A0C6E7DB}"
 EndProject

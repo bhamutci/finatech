@@ -1,10 +1,6 @@
-using FinaTech.Core.Account;
-
 namespace FinaTech.Application.Mapper;
 
 using AutoMapper;
-
-using Core;
 using Services.Payment.Dto;
 public class DtoAutoMapperProfile: Profile
 {
@@ -28,9 +24,9 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void AddressProfile()
     {
-        CreateMap<Address, AddressDto>()
+        CreateMap<Core.Address, Address>()
             .MaxDepth(1);
-        CreateMap<CreateAddressDto, Address>();
+        CreateMap<CreateAddress, Core.Address>();
     }
 
     /// <summary>
@@ -40,12 +36,12 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void AccountProfile()
     {
-        CreateMap<Account, AccountDto>()
+        CreateMap<Core.Account.Account, Account>()
             .MaxDepth(1)
             .ReverseMap()
             .MaxDepth(1);
 
-        CreateMap<CreateAccountDto, Account>()
+        CreateMap<CreateAccount, Core.Account.Account>()
             .MaxDepth(1);
     }
 
@@ -56,7 +52,7 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void MoneyProfile()
     {
-        CreateMap<Money, MoneyDto>()
+        CreateMap<Core.Money, Money>()
             .MaxDepth(1)
             .ReverseMap()
             .MaxDepth(1);
@@ -68,7 +64,7 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void PaymentProfile()
     {
-        CreateMap<Payment, PaymentDto>()
+        CreateMap<Core.Payment, Payment>()
             .MaxDepth(1)
             .ForMember(member => member.ChargesBearer,
                 opt => opt.MapFrom(p => (ChargesBearer) p.ChargesBearer))
@@ -77,10 +73,6 @@ public class DtoAutoMapperProfile: Profile
             .ForMember(member =>member.ChargesBearer,
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
 
-        CreateMap<CreatePaymentDto, Payment>()
-            .ForMember(member => member.BeneficiaryAccount,
-                opt=> opt.Ignore())
-            .ForMember(member => member.OriginatorAccount,
-            opt=> opt.Ignore());
+        CreateMap<CreatePayment, Core.Payment>();
     }
 }

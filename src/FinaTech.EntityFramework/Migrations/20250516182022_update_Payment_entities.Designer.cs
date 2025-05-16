@@ -3,6 +3,7 @@ using System;
 using FinaTech.EntityFramework.PostgresSqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinaTech.EntityFramework.Migrations
 {
     [DbContext(typeof(FinaTechPostgresSqlDbContext))]
-    partial class FinaTechPostgresSqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250516182022_update_Payment_entities")]
+    partial class update_Payment_entities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,8 +189,8 @@ namespace FinaTech.EntityFramework.Migrations
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
-                                .HasMaxLength(3)
-                                .HasColumnType("character varying(3)");
+                                .HasMaxLength(2)
+                                .HasColumnType("character varying(2)");
 
                             b1.Property<decimal>("Value")
                                 .HasColumnType("numeric");

@@ -4,7 +4,7 @@ using FluentValidation;
 
 
 /// <summary>
-/// Provides validation rules for the <see cref="CreateAccountDto"/> object.
+/// Provides validation rules for the <see cref="CreateAccount"/> object.
 /// Ensures that the account's required fields adhere to defined constraints to maintain data integrity.
 /// </summary>
 /// <remarks>
@@ -13,7 +13,7 @@ using FluentValidation;
 /// - Verifying that the account number, if present, is not empty or null.
 /// - Validating the account address is non-null and conforms to the validation rules defined in <see cref="AddressDtoValidator"/>.
 /// </remarks>
-public class CreateAccountDtoValidator: AbstractValidator<CreateAccountDto>
+public class CreateAccountDtoValidator: AbstractValidator<CreateAccount>
 {
     public CreateAccountDtoValidator()
     {

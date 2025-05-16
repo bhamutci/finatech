@@ -1,5 +1,3 @@
-using FinaTech.Core.Account;
-
 namespace FinaTech.Application.Services.Payment;
 
 using System.Data.Common;
@@ -8,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 using FluentValidation;
 using AutoMapper;
-
-using Core;
 using Dto;
 using Exceptions;
 using EntityFramework.PostgresSqlServer;
@@ -23,11 +19,11 @@ public class PaymentService : BaseApplicationService, IPaymentService
     #region Constructors
 
     /// <summary>
-    /// Validator for the <see cref="CreatePaymentDto"/> object, ensuring
+    /// Validator for the <see cref="CreatePayment"/> object, ensuring
     /// that the provided payment data is valid and conforms to predefined
     /// business and application rules.
     /// </summary>
-    private readonly IValidator<CreatePaymentDto?> _paymentValidator;
+    private readonly IValidator<CreatePayment?> _paymentValidator;
 
     #endregion
 
@@ -37,7 +33,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// Service for handling operations related to payments in the FinaTech application.
     /// </summary>
     public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<PaymentService> logger,
-        IValidator<CreatePaymentDto?> paymentValidator) : base(dbContext, mapper, logger)
+        IValidator<CreatePayment?> paymentValidator) : base(dbContext, mapper, logger)
     {
         _paymentValidator = paymentValidator;
     }
@@ -51,8 +47,8 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// </summary>
     /// <param name="id">The unique identifier of the payment to be retrieved.</param>
     /// <param name="cancellationToken"></param>
-    /// <returns>A <see cref="PaymentDto"/> representing the details of the payment, or null if no payment is found.</returns>
-    public async Task<PaymentDto?> GetPaymentAsync(int id, CancellationToken cancellationToken)
+    /// <returns>A <see cref="Dto.Payment"/> representing the details of the payment, or null if no payment is found.</returns>
+    public async Task<Dto.Payment?> GetPaymentAsync(int id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve payment with ID: {PaymentId}", id);
 
@@ -67,7 +63,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 return null;
             }
 
-            return mapper.Map<Payment, PaymentDto>(payment);
+            return mapper.Map<Core.Payment, Dto.Payment>(payment);
         }
         catch (OperationCanceledException)
         {
@@ -89,8 +85,8 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <summary>
     /// Retrieves a list of all payments.
     /// </summary>
-    /// <returns>A read-only list of <see cref="PaymentDto"/> objects representing payments.</returns>
-    public async Task<PagedResultDto<PaymentDto>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
+    /// <returns>A read-only list of <see cref="Dto.Payment"/> objects representing payments.</returns>
+    public async Task<PagedResultDto<Dto.Payment>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve payments with filter: Keywords='{Keywords}', BeneficiaryAccountId='{BeneficiaryAccountId}', OriginatorAccountId='{OriginatorAccountId}', Skip={Skip}, Take={Take}",
             paymentFilter?.Keywords, paymentFilter?.BeneficiaryAccountId, paymentFilter?.OriginatorAccountId, paymentFilter?.SkipCount, paymentFilter?.MaxResultCount);
@@ -110,9 +106,9 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 .ToListAsync(cancellationToken);
 
             var paymentDtos =
-                mapper.Map<IReadOnlyList<Payment>, IReadOnlyList<PaymentDto>>(payments);
+                mapper.Map<IReadOnlyList<Core.Payment>, IReadOnlyList<Dto.Payment>>(payments);
 
-            var pagedResultDto = new PagedResultDto<PaymentDto>(paymentDtos, totalCount);
+            var pagedResultDto = new PagedResultDto<Dto.Payment>(paymentDtos, totalCount);
 
             logger.LogInformation("Retrieved {PaymentCount} payments out of {TotalCount} total payments.",
                 paymentDtos.Count, totalCount);
@@ -141,9 +137,9 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// </summary>
     /// <param name="payment">The details of the payment to be created.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-    /// <returns>A <see cref="PaymentDto"/> object representing the created payment.</returns>
+    /// <returns>A <see cref="Dto.Payment"/> object representing the created payment.</returns>
     /// <exception cref="PaymentException">Thrown when there is an issue creating the payment.</exception>
-    public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
+    public async Task<Dto.Payment> CreatePaymentAsync(CreatePayment payment, CancellationToken cancellationToken)
     {
         try
         {
@@ -186,7 +182,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="payment">The payment data transfer object containing the details of the payment to be saved.</param>
     /// <param name="cancellationToken">The cancellation token to observe for request cancellation.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains the saved payment data transfer object.</returns>
-    private async Task<PaymentDto> SavePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
+    private async Task<Dto.Payment> SavePaymentAsync(CreatePayment payment, CancellationToken cancellationToken)
     {
         var validationResult = await ValidatePaymentAsync(payment, cancellationToken);
 
@@ -196,12 +192,12 @@ public class PaymentService : BaseApplicationService, IPaymentService
         }
 
         logger.LogDebug("Mapping PaymentDto to Payment entity for saving.");
-        var paymentEntity = mapper.Map<CreatePaymentDto, Payment>(payment);
+        var paymentEntity = mapper.Map<CreatePayment, Core.Payment>(payment);
 
         var beneficiaryAccount = await GetAccountAsync(payment.BeneficiaryAccount, cancellationToken);
         if (beneficiaryAccount == null)
         {
-            paymentEntity.BeneficiaryAccount = mapper.Map<CreateAccountDto, Account>(payment.BeneficiaryAccount);
+            paymentEntity.BeneficiaryAccount = mapper.Map<CreateAccount, Core.Account.Account>(payment.BeneficiaryAccount);
         }
         else
         {
@@ -211,7 +207,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         var originatorAccount = await GetAccountAsync(payment.OriginatorAccount, cancellationToken);
         if (originatorAccount == null)
         {
-            paymentEntity.OriginatorAccount = mapper.Map<CreateAccountDto, Account>(payment.OriginatorAccount);
+            paymentEntity.OriginatorAccount = mapper.Map<CreateAccount, Core.Account.Account>(payment.OriginatorAccount);
         }
         else
         {
@@ -225,7 +221,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
 
         logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentEntity.Id);
-        return mapper.Map<Payment, PaymentDto>(paymentEntity);
+        return mapper.Map<Core.Payment, Dto.Payment>(paymentEntity);
     }
 
     /// <summary>
@@ -234,7 +230,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="paymentFilter">The filter object containing criteria such as keywords, beneficiary account ID, or originator account ID.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A queryable collection of payments filtered based on the criteria specified within the paymentFilter.</returns>
-    private IQueryable<Payment> GetPaymentsQuery(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
+    private IQueryable<Core.Payment> GetPaymentsQuery(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -277,7 +273,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="createAccount">The account details to search or create.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the account details.</returns>
-    private async Task<Account?> GetAccountAsync(CreateAccountDto createAccount,
+    private async Task<Core.Account.Account?> GetAccountAsync(CreateAccount createAccount,
         CancellationToken cancellationToken)
     {
         var account = await dbContext.Accounts.Where(a=>a.Name.Contains(createAccount.Name) ||
@@ -293,7 +289,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="payment">The payment data to validate, including originator and beneficiary account details, amount, date, reference number, and other related information.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of validation error messages, if any, or an empty list if validation is successful.</returns>
-    private async Task<IReadOnlyList<string>> ValidatePaymentAsync(CreatePaymentDto? payment,
+    private async Task<IReadOnlyList<string>> ValidatePaymentAsync(CreatePayment? payment,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
