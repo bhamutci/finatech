@@ -17,6 +17,10 @@ public class CreatePaymentDtoValidator: AbstractValidator<CreatePaymentDto>
 {
     public CreatePaymentDtoValidator()
     {
+        RuleFor(payment => payment)
+            .NotNull()
+            .WithMessage("Validation failed: Payment details cannot be null.");
+
         RuleFor(payment => payment.ReferenceNumber)
             .NotEmpty()
             .WithMessage("Payment reference number cannot be null or empty.");

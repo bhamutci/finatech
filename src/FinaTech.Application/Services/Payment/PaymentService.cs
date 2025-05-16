@@ -26,7 +26,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// that the provided payment data is valid and conforms to predefined
     /// business and application rules.
     /// </summary>
-    private readonly IValidator<CreatePaymentDto> _paymentValidator;
+    private readonly IValidator<CreatePaymentDto?> _paymentValidator;
 
     #endregion
 
@@ -36,7 +36,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// Service for handling operations related to payments in the FinaTech application.
     /// </summary>
     public PaymentService(FinaTechPostgresSqlDbContext dbContext, IMapper mapper, ILogger<PaymentService> logger,
-        IValidator<CreatePaymentDto> paymentValidator) : base(dbContext, mapper, logger)
+        IValidator<CreatePaymentDto?> paymentValidator) : base(dbContext, mapper, logger)
     {
         _paymentValidator = paymentValidator;
     }
@@ -146,7 +146,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A <see cref="PaymentDto"/> object representing the created payment.</returns>
     /// <exception cref="PaymentException">Thrown when there is an issue creating the payment.</exception>
-    public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto? payment, CancellationToken cancellationToken)
+    public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
     {
         try
         {
@@ -154,7 +154,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         }
         catch (OperationCanceledException)
         {
-            logger.LogWarning("CreatePaymentAsync for ReferenceNumber {ReferenceNumber} was cancelled.", payment?.ReferenceNumber);
+            logger.LogWarning("Payment creation for ReferenceNumber {ReferenceNumber} was cancelled.", payment.ReferenceNumber);
             throw;
         }
         catch (Exceptions.ValidationException valEx)
@@ -178,7 +178,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An unexpected error occurred while creating a payment. ReferenceNumber: {ReferenceNumber}", payment?.ReferenceNumber);
+            logger.LogError(ex, "An unexpected error occurred while creating a payment. ReferenceNumber: {ReferenceNumber}", payment.ReferenceNumber);
             throw new PaymentException("An unexpected error occurred while creating the payment.", ex);
         }
     }
@@ -193,16 +193,8 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="payment">The payment data transfer object containing the details of the payment to be saved.</param>
     /// <param name="cancellationToken">The cancellation token to observe for request cancellation.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains the saved payment data transfer object.</returns>
-    private async Task<PaymentDto> SavePaymentAsync(CreatePaymentDto? payment, CancellationToken cancellationToken)
+    private async Task<PaymentDto> SavePaymentAsync(CreatePaymentDto payment, CancellationToken cancellationToken)
     {
-        logger.LogDebug("Mapping PaymentDto to Payment entity for saving.");
-
-        if (payment == null)
-        {
-            logger.LogWarning("Validation failed: Payment details cannot be null.");
-            throw new ArgumentNullException(nameof(payment), "Payment details cannot be null.");
-        }
-
         var validationResult = await ValidatePaymentAsync(payment, cancellationToken);
 
         if (validationResult.Count > 0)
@@ -210,15 +202,28 @@ public class PaymentService : BaseApplicationService, IPaymentService
             throw new Exceptions.ValidationException("Payment input validation failed.", validationResult);
         }
 
-        var beneficiaryAccount = await GetOrCreateAccountAsync(payment.BeneficiaryAccount, cancellationToken);
-
-        var originatorAccount = await GetOrCreateAccountAsync(payment.OriginatorAccount, cancellationToken);
-
+        logger.LogDebug("Mapping PaymentDto to Payment entity for saving.");
         var paymentEntity = mapper.Map<CreatePaymentDto, Payment>(payment);
 
-        paymentEntity.BeneficiaryAccountId = beneficiaryAccount.Id;
+        var beneficiaryAccount = await GetAccountAsync(payment.BeneficiaryAccount, cancellationToken);
+        if (beneficiaryAccount == null)
+        {
+            paymentEntity.BeneficiaryAccount = mapper.Map<CreateAccountDto, Account>(payment.BeneficiaryAccount);
+        }
+        else
+        {
+            paymentEntity.BeneficiaryAccountId = beneficiaryAccount.Id;
+        }
 
-        paymentEntity.OriginatorAccountId = originatorAccount.Id;
+        var originatorAccount = await GetAccountAsync(payment.OriginatorAccount, cancellationToken);
+        if (originatorAccount == null)
+        {
+            paymentEntity.OriginatorAccount = mapper.Map<CreateAccountDto, Account>(payment.OriginatorAccount);
+        }
+        else
+        {
+            paymentEntity.OriginatorAccountId = originatorAccount.Id;
+        }
 
         await dbContext.Payments.AddAsync(paymentEntity, cancellationToken);
 
@@ -279,22 +284,14 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="createAccount">The account details to search or create.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the account details.</returns>
-    private async Task<AccountDto> GetOrCreateAccountAsync(CreateAccountDto createAccount,
+    private async Task<Account?> GetAccountAsync(CreateAccountDto createAccount,
         CancellationToken cancellationToken)
     {
         var account = await dbContext.Accounts.Where(a=>a.Name.Contains(createAccount.Name) ||
                                                         a.AccountNumber.Contains(createAccount.AccountNumber) ||
-                                                        a.Iban.Contains(createAccount.Iban)).FirstOrDefaultAsync(cancellationToken: cancellationToken);;
+                                                        a.Iban.Contains(createAccount.Iban)).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-        if (account == null)
-        {
-            account = mapper.Map<CreateAccountDto, Core.Account>(createAccount);
-            await dbContext.Accounts.AddAsync(account, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            await dbContext.Entry(account).ReloadAsync(cancellationToken);
-        }
-
-        return mapper.Map<Account, AccountDto>(account);
+        return account;
     }
 
     /// <summary>
@@ -303,7 +300,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="payment">The payment data to validate, including originator and beneficiary account details, amount, date, reference number, and other related information.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of validation error messages, if any, or an empty list if validation is successful.</returns>
-    private async Task<IReadOnlyList<string>> ValidatePaymentAsync(CreatePaymentDto payment,
+    private async Task<IReadOnlyList<string>> ValidatePaymentAsync(CreatePaymentDto? payment,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

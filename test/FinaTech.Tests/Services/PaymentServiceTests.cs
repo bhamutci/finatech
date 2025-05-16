@@ -30,7 +30,7 @@ public class PaymentServiceTests
     private IMapper _mapper;
     private ILogger<PaymentService> _logger;
     private PaymentService _paymentService;
-    private IValidator<CreatePaymentDto> _validator;
+    private IValidator<CreatePaymentDto?> _validator;
     private static readonly Address Address = new() {Id = 1, CountryCode = "GB", AddressLine1 = "Test St"};
     private static readonly AddressDto AddressDto = new(1,"Test St",string.Empty, string.Empty, string.Empty, string.Empty, CountryCode:"GB");
 

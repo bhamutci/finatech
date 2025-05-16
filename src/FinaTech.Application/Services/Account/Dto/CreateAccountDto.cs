@@ -4,7 +4,7 @@ public record CreateAccountDto(
     string Name,
     string Iban,
     string Bic,
-    string? AccountNumber,
+    string AccountNumber,
     AddressDto? Address)
 {
 }
