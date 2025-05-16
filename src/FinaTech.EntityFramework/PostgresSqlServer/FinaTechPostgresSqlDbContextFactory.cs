@@ -1,3 +1,4 @@
+using FinaTech.Core.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,7 @@ public sealed class FinaTechPostgresSqlDbContextFactory: IDesignTimeDbContextFac
 {
     public FinaTechPostgresSqlDbContext CreateDbContext(string[] args)
     {
-        var configuration = Core.ApplicationConfigurations.Get(Directory.GetCurrentDirectory());
+        var configuration = ApplicationConfigurations.Get(Directory.GetCurrentDirectory());
 
         var builder = new DbContextOptionsBuilder<FinaTechPostgresSqlDbContext>();
 

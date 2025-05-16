@@ -1,6 +1,7 @@
+namespace FinaTech.Core.Account;
+
 using System.ComponentModel.DataAnnotations;
 
-namespace FinaTech.Core;
 
 /// <summary>
 /// Represents a physical or mailing address, encapsulating details such as address lines,

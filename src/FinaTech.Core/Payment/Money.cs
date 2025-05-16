@@ -1,7 +1,10 @@
+namespace FinaTech.Core.Payment;
+
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FinaTech.Core;
-
+/// <summary>
+/// Represents an amount of money and its associated currency.
+/// </summary>
 [ComplexType]
 public record Money(
     decimal Value,

@@ -1,8 +1,8 @@
-﻿using FinaTech.Core.Account;
-
-namespace FinaTech.Core;
+﻿namespace FinaTech.Core.Payment;
 
 using System.ComponentModel.DataAnnotations;
+using Account;
+
 
 /// <summary>
 /// Represents a payment transaction between two accounts.
@@ -44,13 +44,13 @@ public sealed class Payment
     /// This property establishes a relationship to the <see cref="Account"/> entity,
     /// representing the sender's account in the transaction.
     /// </summary>
-    public Account.Account? OriginatorAccount { get; set; }
+    public Account? OriginatorAccount { get; set; }
 
     /// <summary>
     /// Gets or sets the beneficiary account associated with the payment.
     /// This represents the account that will receive the payment amount.
     /// </summary>
-    public Account.Account? BeneficiaryAccount { get; set; }
+    public Account? BeneficiaryAccount { get; set; }
 
     /// <summary>
     /// Gets or sets the charge bearer for the payment transaction.

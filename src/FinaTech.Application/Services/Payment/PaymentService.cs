@@ -63,7 +63,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 return null;
             }
 
-            return mapper.Map<Core.Payment, Dto.Payment>(payment);
+            return mapper.Map<Core.Payment.Payment, Dto.Payment>(payment);
         }
         catch (OperationCanceledException)
         {
@@ -106,7 +106,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 .ToListAsync(cancellationToken);
 
             var paymentDtos =
-                mapper.Map<IReadOnlyList<Core.Payment>, IReadOnlyList<Dto.Payment>>(payments);
+                mapper.Map<IReadOnlyList<Core.Payment.Payment>, IReadOnlyList<Dto.Payment>>(payments);
 
             var pagedResultDto = new PagedResultDto<Dto.Payment>(paymentDtos, totalCount);
 
@@ -192,7 +192,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         }
 
         logger.LogDebug("Mapping PaymentDto to Payment entity for saving.");
-        var paymentEntity = mapper.Map<CreatePayment, Core.Payment>(payment);
+        var paymentEntity = mapper.Map<CreatePayment, Core.Payment.Payment>(payment);
 
         var beneficiaryAccount = await GetAccountAsync(payment.BeneficiaryAccount, cancellationToken);
         if (beneficiaryAccount == null)
@@ -221,7 +221,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
 
         logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentEntity.Id);
-        return mapper.Map<Core.Payment, Dto.Payment>(paymentEntity);
+        return mapper.Map<Core.Payment.Payment, Dto.Payment>(paymentEntity);
     }
 
     /// <summary>
@@ -230,7 +230,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="paymentFilter">The filter object containing criteria such as keywords, beneficiary account ID, or originator account ID.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A queryable collection of payments filtered based on the criteria specified within the paymentFilter.</returns>
-    private IQueryable<Core.Payment> GetPaymentsQuery(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
+    private IQueryable<Core.Payment.Payment> GetPaymentsQuery(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

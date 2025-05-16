@@ -232,19 +232,19 @@ public class PaymentServiceTests
         Assert.That(paymentCountAfter, Is.EqualTo(0));
     }
 
-    private List<Core.Payment> GetSamplePayments(int count, int startId = 1)
+    private List<Core.Payment.Payment> GetSamplePayments(int count, int startId = 1)
     {
-        var payments = new List<Core.Payment>();
+        var payments = new List<Core.Payment.Payment>();
         var mapper = _serviceProvider.GetService<IMapper>();
         for (int i = 0; i < count; i++)
         {
             var id = startId + i;
-            payments.Add(new Core.Payment
+            payments.Add(new Core.Payment.Payment
             {
                 Id = id,
                 ReferenceNumber = $"REF{id.ToString().PadLeft(5, '0')}",
                 Details = $"Details for payment {id}",
-                Amount = new Core.Money(10,"GB"),
+                Amount = new Core.Payment.Money(10,"GB"),
                 Date = DateTimeOffset.Now,
                 ChargesBearer = (int)ChargesBearer.Originator,
                 OriginatorAccount =  mapper?.Map<CreateAccount, Core.Account.Account>(OriginatorAccount) ,

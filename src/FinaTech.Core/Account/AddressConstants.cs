@@ -1,4 +1,4 @@
-namespace FinaTech.Core;
+namespace FinaTech.Core.Account;
 
 /// <summary>
 /// Defines constant values related to address properties, such as maximum lengths for individual address fields.

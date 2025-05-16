@@ -1,4 +1,4 @@
-namespace FinaTech.Core;
+namespace FinaTech.Core.Payment;
 
 public static class PaymentConstants
 {

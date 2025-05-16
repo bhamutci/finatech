@@ -24,9 +24,9 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void AddressProfile()
     {
-        CreateMap<Core.Address, Address>()
+        CreateMap<Core.Account.Address, Address>()
             .MaxDepth(1);
-        CreateMap<CreateAddress, Core.Address>();
+        CreateMap<CreateAddress, Core.Account.Address>();
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void MoneyProfile()
     {
-        CreateMap<Core.Money, Money>()
+        CreateMap<Core.Payment.Money, Money>()
             .MaxDepth(1)
             .ReverseMap()
             .MaxDepth(1);
@@ -64,7 +64,7 @@ public class DtoAutoMapperProfile: Profile
     /// </summary>
     private void PaymentProfile()
     {
-        CreateMap<Core.Payment, Payment>()
+        CreateMap<Core.Payment.Payment, Payment>()
             .MaxDepth(1)
             .ForMember(member => member.ChargesBearer,
                 opt => opt.MapFrom(p => (ChargesBearer) p.ChargesBearer))
@@ -73,6 +73,6 @@ public class DtoAutoMapperProfile: Profile
             .ForMember(member =>member.ChargesBearer,
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
 
-        CreateMap<CreatePayment, Core.Payment>();
+        CreateMap<CreatePayment, Core.Payment.Payment>();
     }
 }

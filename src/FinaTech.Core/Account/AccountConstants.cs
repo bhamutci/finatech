@@ -1,6 +1,4 @@
-using FinaTech.Core.Account;
-
-namespace FinaTech.Core;
+namespace FinaTech.Core.Account;
 
 /// <summary>
 /// Defines constant values related to account properties, including limits for name,

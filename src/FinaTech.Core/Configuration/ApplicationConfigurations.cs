@@ -1,7 +1,8 @@
+namespace FinaTech.Core.Configuration;
+
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
 
-namespace FinaTech.Core;
 
 /// <summary>
 /// Provides mechanisms to retrieve and manage application configuration settings.
@@ -21,12 +22,12 @@ public class ApplicationConfigurations
     }
 
     /// <summary>
-    /// Retrieves a cached application configuration or builds a new one if not already cached.
+    /// Retrieves an <see cref="IConfigurationRoot"/> instance, either from the cache or by building it
+    /// based on the specified configuration file path and optional environment name.
     /// </summary>
-    /// <param name="path">The base path where the configuration file is located.</param>
-    /// <param name="environmentName">The optional name of the environment for environment-specific configuration files.</param>
-    /// <param name="addUserSecrets">Indicates whether user secrets should be included in the configuration.</param>
-    /// <returns>The application configuration as an <see cref="IConfigurationRoot"/> instance.</returns>
+    /// <param name="path">The directory path containing the configuration file.</param>
+    /// <param name="environmentName">An optional environment name to use when loading environment-specific configurations.</param>
+    /// <returns>An <see cref="IConfigurationRoot"/> instance containing the application configuration settings.</returns>
     public static IConfigurationRoot Get(string path, string? environmentName = null)
     {
         var cacheKey = path + "#" + environmentName + "#";

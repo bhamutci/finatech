@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using FinaTech.Core;
 using FinaTech.Core.Account;
+using FinaTech.Core.Payment;
 
 namespace FinaTech.EntityFramework;
 
@@ -16,7 +17,7 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
 
   /// <summary>
   /// Gets or sets the database set for payment transactions, allowing CRUD operations
-  /// on the <see cref="FinaTech.Core.Payment"/> entities stored in the database.
+  /// on the <see cref="Payment"/> entities stored in the database.
   /// </summary>
   public DbSet<Payment> Payments { get; set; }
 
@@ -28,7 +29,7 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
 
   /// <summary>
   /// Gets or sets the database set for address entities, enabling CRUD operations
-  /// on the <see cref="FinaTech.Core.Address"/> entities stored in the database.
+  /// on the <see cref="Address"/> entities stored in the database.
   /// </summary>
   public DbSet<Address> Addresses { get; set; }
 
@@ -89,7 +90,7 @@ public abstract class FinaTechDbContextBase<T>(DbContextOptions<T> options) : Db
   /// <param name="modelBuilder">The builder used to define the model for the Payment entity.</param>
   private void CreatePaymentEntity(ModelBuilder modelBuilder)
   {
-    modelBuilder.Entity<Core.Payment>(payment =>
+    modelBuilder.Entity<Payment>(payment =>
     {
       payment.ToTable("Payments");
       payment.HasKey(p => p.Id);
