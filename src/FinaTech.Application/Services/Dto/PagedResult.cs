@@ -4,7 +4,7 @@ namespace FinaTech.Application.Services.Dto;
 /// Represents a paged result of a query, containing a list of items and the total count of all items that satisfy the query conditions.
 /// </summary>
 /// <typeparam name="T">The type of the items in the result set.</typeparam>
-public class PagedResultDto<T> : ListResultDto<T>, IPageResult<T>
+public class PagedResult<T> : ListResult<T>, IPageResult<T>
 {
   /// <summary>
   /// Gets or sets the total number of items that satisfy the query conditions.
@@ -19,7 +19,7 @@ public class PagedResultDto<T> : ListResultDto<T>, IPageResult<T>
   /// Represents a paged result containing a collection of items and the total count of all items that match the query criteria.
   /// </summary>
   /// <typeparam name="T">The type of the items in the result.</typeparam>
-  public PagedResultDto(IReadOnlyList<T> items, int totalCount) : base(items)
+  public PagedResult(IReadOnlyList<T> items, int totalCount) : base(items)
   {
     TotalCount = totalCount;
   }

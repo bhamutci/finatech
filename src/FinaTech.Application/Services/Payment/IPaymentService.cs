@@ -19,7 +19,7 @@ public interface IPaymentService
     /// Asynchronously retrieves a collection of payments.
     /// </summary>
     /// <returns>A read-only list of <see cref="Payment"/> objects representing the payments.</returns>
-    Task<PagedResultDto<Payment>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken);
+    Task<PagedResult<ListPayment>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously creates a new payment.

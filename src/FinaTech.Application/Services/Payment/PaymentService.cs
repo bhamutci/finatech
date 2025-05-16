@@ -48,7 +48,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="id">The unique identifier of the payment to be retrieved.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Dto.Payment"/> representing the details of the payment, or null if no payment is found.</returns>
-    public async Task<Dto.Payment?> GetPaymentAsync(int id, CancellationToken cancellationToken)
+    public async Task<Payment?> GetPaymentAsync(int id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve payment with ID: {PaymentId}", id);
 
@@ -86,7 +86,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// Retrieves a list of all payments.
     /// </summary>
     /// <returns>A read-only list of <see cref="Dto.Payment"/> objects representing payments.</returns>
-    public async Task<PagedResultDto<Dto.Payment>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
+    public async Task<PagedResult<ListPayment>> GetPaymentsAsync(PaymentFilter? paymentFilter, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to retrieve payments with filter: Keywords='{Keywords}', BeneficiaryAccountId='{BeneficiaryAccountId}', OriginatorAccountId='{OriginatorAccountId}', Skip={Skip}, Take={Take}",
             paymentFilter?.Keywords, paymentFilter?.BeneficiaryAccountId, paymentFilter?.OriginatorAccountId, paymentFilter?.SkipCount, paymentFilter?.MaxResultCount);
@@ -106,9 +106,9 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 .ToListAsync(cancellationToken);
 
             var paymentDtos =
-                mapper.Map<IReadOnlyList<Core.Payment.Payment>, IReadOnlyList<Dto.Payment>>(payments);
+                mapper.Map<IReadOnlyList<Core.Payment.Payment>, IReadOnlyList<ListPayment>>(payments);
 
-            var pagedResultDto = new PagedResultDto<Dto.Payment>(paymentDtos, totalCount);
+            var pagedResultDto = new PagedResult<ListPayment>(paymentDtos, totalCount);
 
             logger.LogInformation("Retrieved {PaymentCount} payments out of {TotalCount} total payments.",
                 paymentDtos.Count, totalCount);

@@ -74,5 +74,10 @@ public class DtoAutoMapperProfile: Profile
                 opt=>opt.MapFrom(p=>(int)p.ChargesBearer));
 
         CreateMap<CreatePayment, Core.Payment.Payment>();
+        CreateMap<Core.Payment.Payment, ListPayment>()
+            .ForMember(member => member.Originator,
+                opt => opt.MapFrom(p => p.OriginatorAccount.Name))
+            .ForMember(member => member.Beneficiary,
+                opt => opt.MapFrom(p => p.BeneficiaryAccount.Name));
     }
 }
