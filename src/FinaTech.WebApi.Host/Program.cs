@@ -12,6 +12,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 
+string[] enabledCorsOrigins =
+    builder.Configuration["Application:CorsOrigins"]?.Split(",", StringSplitOptions.RemoveEmptyEntries) ??
+    [];
+
+builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
+    policy =>
+        policy.WithOrigins(enabledCorsOrigins)
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()));
+
 var app = builder.Build();
 
 app.UseMiddleware<PaymentErrorHandlingMiddleware>();
@@ -22,6 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
