@@ -63,7 +63,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 return null;
             }
 
-            return mapper.Map<Core.Payment.Payment, Dto.Payment>(payment);
+            return mapper.Map<Core.Payment.Payment, Payment>(payment);
         }
         catch (OperationCanceledException)
         {
@@ -106,7 +106,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
                 .ToListAsync(cancellationToken);
 
             var paymentDtos =
-                mapper.Map<IReadOnlyList<Core.Payment.Payment>, IReadOnlyList<ListPayment>>(payments);
+                mapper.Map<List<Core.Payment.Payment>, IReadOnlyList<ListPayment>>(payments);
 
             var pagedResultDto = new PagedResult<ListPayment>(paymentDtos, totalCount);
 
@@ -139,7 +139,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A <see cref="Dto.Payment"/> object representing the created payment.</returns>
     /// <exception cref="PaymentException">Thrown when there is an issue creating the payment.</exception>
-    public async Task<Dto.Payment> CreatePaymentAsync(CreatePayment payment, CancellationToken cancellationToken)
+    public async Task<Payment> CreatePaymentAsync(CreatePayment payment, CancellationToken cancellationToken)
     {
         try
         {
@@ -182,7 +182,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
     /// <param name="payment">The payment data transfer object containing the details of the payment to be saved.</param>
     /// <param name="cancellationToken">The cancellation token to observe for request cancellation.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains the saved payment data transfer object.</returns>
-    private async Task<Dto.Payment> SavePaymentAsync(CreatePayment payment, CancellationToken cancellationToken)
+    private async Task<Payment> SavePaymentAsync(CreatePayment payment, CancellationToken cancellationToken)
     {
         var validationResult = await ValidatePaymentAsync(payment, cancellationToken);
 
@@ -221,7 +221,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
 
         logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentEntity.Id);
-        return mapper.Map<Core.Payment.Payment, Dto.Payment>(paymentEntity);
+        return mapper.Map<Core.Payment.Payment, Payment>(paymentEntity);
     }
 
     /// <summary>

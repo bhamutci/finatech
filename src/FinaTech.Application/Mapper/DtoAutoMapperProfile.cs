@@ -2,6 +2,11 @@ namespace FinaTech.Application.Mapper;
 
 using AutoMapper;
 using Services.Payment.Dto;
+
+/// <summary>
+/// Provides a mapping profile for AutoMapper to map between domain entities and Data Transfer Objects (DTOs).
+/// This class centralizes mapping configurations, enabling seamless conversions between different models such as Address, Account, Payment, and Bank.
+/// </summary>
 public class DtoAutoMapperProfile: Profile
 {
     /// <summary>
@@ -53,7 +58,7 @@ public class DtoAutoMapperProfile: Profile
     private void MoneyProfile()
     {
         CreateMap<Core.Payment.Money, Money>()
-            .MaxDepth(1)
+            .ConstructUsing(m=>new(m.Value, m.Currency))
             .ReverseMap()
             .MaxDepth(1);
     }
@@ -75,9 +80,6 @@ public class DtoAutoMapperProfile: Profile
 
         CreateMap<CreatePayment, Core.Payment.Payment>();
         CreateMap<Core.Payment.Payment, ListPayment>()
-            .ForMember(member => member.Originator,
-                opt => opt.MapFrom(p => p.OriginatorAccount.Name))
-            .ForMember(member => member.Beneficiary,
-                opt => opt.MapFrom(p => p.BeneficiaryAccount.Name));
+            .ConstructUsing(p=> new(p.Id, p.OriginatorAccount.Name, p.BeneficiaryAccount.Name, new (p.Amount.Value, p.Amount.Currency), p.Date, (ChargesBearer)p.ChargesBearer, p.Details, p.ReferenceNumber));
     }
 }

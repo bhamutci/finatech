@@ -1,4 +1,5 @@
 using FinaTech.Application;
+using FinaTech.Application.Services.Dto;
 using FinaTech.Application.Services.Payment;
 using FinaTech.Application.Services.Payment.Dto;
 using FinaTech.Web.Host.Middleware;
@@ -27,16 +28,16 @@ app.UseHttpsRedirection();
 // Endpoint for GET /payments/{id}
 // Retrieves a single payment by ID
 app.MapGet("/payments/{id:int}", async (int id, IPaymentService paymentService, CancellationToken cancellationToken) =>
-{
-    var payment = await paymentService.GetPaymentAsync(id, cancellationToken);
-
-    if (payment == null)
     {
-        return Results.NotFound($"Payment with ID {id} not found.");
-    }
+        var payment = await paymentService.GetPaymentAsync(id, cancellationToken);
 
-    return Results.Ok(payment);
-})
+        if (payment == null)
+        {
+            return Results.NotFound($"Payment with ID {id} not found.");
+        }
+
+        return Results.Ok(payment);
+    })
 .WithName("GetPayment")
 .WithTags("Payment")
 .Produces<Payment>()
@@ -44,11 +45,26 @@ app.MapGet("/payments/{id:int}", async (int id, IPaymentService paymentService, 
 .Produces(StatusCodes.Status499ClientClosedRequest)
 .Produces(StatusCodes.Status500InternalServerError);
 
-app.MapPost("/payments", async (IPaymentService paymentService, CreatePayment payment, CancellationToken cancellationToken) =>
-{
-    var createdPayment = await paymentService.CreatePaymentAsync(payment, cancellationToken);
-    return Results.Created($"/payments/{createdPayment.Id}", createdPayment);
-})
+app.MapGet("/payments",
+        async (IPaymentService paymentService, [AsParameters] PaymentFilter filter,
+            CancellationToken cancellationToken) =>
+        {
+            var pagedResult = await paymentService.GetPaymentsAsync(filter, cancellationToken);
+
+            return Results.Ok(pagedResult);
+        })
+    .WithName("GetPayments")
+    .WithTags("Payment")
+    .Produces<PagedResult<ListPayment>>()
+    .Produces(StatusCodes.Status499ClientClosedRequest)
+    .Produces(StatusCodes.Status500InternalServerError);
+
+app.MapPost("/payments",
+        async (IPaymentService paymentService, CreatePayment payment, CancellationToken cancellationToken) =>
+        {
+            var createdPayment = await paymentService.CreatePaymentAsync(payment, cancellationToken);
+            return Results.Created($"/payments/{createdPayment.Id}", createdPayment);
+        })
 .WithName("Create")
 .WithTags("Payment")
 .Produces<Payment>(StatusCodes.Status201Created)
