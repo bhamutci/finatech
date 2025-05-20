@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "dgSpecHash": "8PUnYIChxlM=",
+  "success": true,
+  "projectFilePath": "/Users/bulenthamutci/Projects/git/finatech/FinaTech.Web.Blazor/FinaTech.Web.Blazor.csproj",
+  "expectedPackageFiles": [
+    "/Users/bulenthamutci/.nuget/packages/blazored.fluentvalidation/2.2.0/blazored.fluentvalidation.2.2.0.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/fluentvalidation/12.0.0/fluentvalidation.12.0.0.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/fluentvalidation.aspnetcore/11.3.0/fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/fluentvalidation.dependencyinjectionextensions/12.0.0/fluentvalidation.dependencyinjectionextensions.12.0.0.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.aspnetcore.authorization/8.0.6/microsoft.aspnetcore.authorization.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.aspnetcore.components/8.0.6/microsoft.aspnetcore.components.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.aspnetcore.components.analyzers/8.0.6/microsoft.aspnetcore.components.analyzers.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.aspnetcore.components.forms/8.0.6/microsoft.aspnetcore.components.forms.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.aspnetcore.components.web/8.0.6/microsoft.aspnetcore.components.web.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.aspnetcore.metadata/8.0.6/microsoft.aspnetcore.metadata.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.extensions.dependencyinjection/8.0.0/microsoft.extensions.dependencyinjection.8.0.0.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.1/microsoft.extensions.dependencyinjection.abstractions.8.0.1.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.1/microsoft.extensions.logging.abstractions.8.0.1.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.extensions.options/8.0.2/microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/microsoft.jsinterop/8.0.6/microsoft.jsinterop.8.0.6.nupkg.sha512",
+    "/Users/bulenthamutci/.nuget/packages/system.io.pipelines/8.0.0/system.io.pipelines.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
