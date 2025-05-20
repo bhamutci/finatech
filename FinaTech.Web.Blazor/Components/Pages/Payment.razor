@@ -1,0 +1,48 @@
+@page "/Payment"
+@using Blazored.FluentValidation
+@using FinaTech.Web.Blazor.Model
+<h3>Payment</h3>
+
+<EditForm FormName="Payment" Model="@Address" OnValidSubmit="@HandleSubmit">
+    <FluentValidationValidator/>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="originatorAddressLine1" class="form-label">Address Line 1</label>
+            <InputText id="originatorAddressLine1" class="form-control" @bind-Value="Address.AddressLine1"/>
+            <ValidationMessage For="@(() => Address.AddressLine1)"/>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="originatorAddressLine2" class="form-label">Address Line 2</label>
+            <InputText id="originatorAddressLine2" class="form-control" @bind-Value="Address.AddressLine2"/>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="originatorAddressLine3" class="form-label">Address Line 3</label>
+            <InputText id="originatorAddressLine3" class="form-control" @bind-Value="Address.AddressLine3"/>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="originatorCity" class="form-label">City</label>
+            <InputText id="originatorCity" class="form-control" @bind-Value="Address.City"/>
+            <ValidationMessage For="() => Address.City"/>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="originatorPostCode" class="form-label">Post Code</label>
+            <InputText id="originatorPostCode" class="form-control" @bind-Value="Address.PostCode"/>
+            <ValidationMessage For="@(() => Address.PostCode)"/>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="originatorCountryCode" class="form-label">Country Code</label>
+            <InputText id="originatorCountryCode" class="form-control" @bind-Value="Address.CountryCode"/>
+            <ValidationMessage For="@(() => Address.CountryCode)"/>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Payment</button>
+</EditForm>
+
+@code {
+    AddressModel Address = new AddressModel();
+
+    void HandleSubmit()
+    {
+
+    }
+}

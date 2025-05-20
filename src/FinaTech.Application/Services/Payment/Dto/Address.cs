@@ -9,5 +9,4 @@ public record Address(
     string? PostCode,
     string CountryCode)
 {
-
 }
