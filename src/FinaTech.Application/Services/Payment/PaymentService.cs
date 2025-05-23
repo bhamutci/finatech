@@ -221,6 +221,7 @@ public class PaymentService : BaseApplicationService, IPaymentService
         await dbContext.Entry(paymentEntity).ReloadAsync(cancellationToken);
 
         logger.LogInformation("Payment created successfully with ID: {PaymentId}", paymentEntity.Id);
+
         return mapper.Map<Core.Payment.Payment, Payment>(paymentEntity);
     }
 

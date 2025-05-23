@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace FinaTech.Web.Blazor.Model;
 
 public class AccountModel
@@ -6,5 +8,5 @@ public class AccountModel
     public string Iban { get; set; }= string.Empty;
     public string Bic { get; set; }= string.Empty;
     public string AccountNumber { get; set; }= string.Empty;
-    public AddressModel AddressModel { get; set; } = new();
+    public AddressModel Address { get; set; } = new();
 }

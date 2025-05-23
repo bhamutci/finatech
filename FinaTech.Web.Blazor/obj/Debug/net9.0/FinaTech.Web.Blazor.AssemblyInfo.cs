@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FinaTech.Web.Blazor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b57aba673e8f9fc4daa4cffa9472da84b2ec46cd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+df2b0b4b50c34cd86dc153427f75b9bb8ce6a3ea")]
 [assembly: System.Reflection.AssemblyProductAttribute("FinaTech.Web.Blazor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FinaTech.Web.Blazor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

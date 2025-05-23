@@ -20,7 +20,7 @@ public class AccountValidator: AbstractValidator<AccountModel>
         RuleFor(account => account.AccountNumber)
             .NotEmpty().WithMessage("Account number cannot be null or empty.");
 
-        RuleFor(account => account.AddressModel)
+        RuleFor(account => account.Address)
             .NotNull().WithMessage("Account address cannot be null.")
             .SetValidator(new AddressValidator());
     }

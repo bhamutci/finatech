@@ -20,11 +20,11 @@ public class PaymentValidator: AbstractValidator<PaymentModel>
             .NotNull().WithMessage("Payment amount cannot be null.")
             .SetValidator(new MoneyValidator());
 
-        RuleFor(payment => payment.BeneficiaryAccountModel)
+        RuleFor(payment => payment.BeneficiaryAccount)
             .NotNull().WithMessage("Payment beneficiary account cannot be null.")
             .SetValidator(new AccountValidator());
 
-        RuleFor(payment => payment.OriginatorAccountModel)
+        RuleFor(payment => payment.OriginatorAccount)
             .NotNull().WithMessage("Payment originator account cannot be null.")
             .SetValidator(new AccountValidator());
 
