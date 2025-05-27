@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Tests", "test\Fina
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Web.Tests", "test\FinaTech.Web.Tests\FinaTech.Web.Tests.csproj", "{7BA35F9D-4E1F-474B-A034-D1610ADBBFC3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Web.Blazor", "FinaTech.Web.Blazor\FinaTech.Web.Blazor.csproj", "{9C363B1F-1E5C-487C-B406-324D11BCF570}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinaTech.Web.Blazor", "src\FinaTech.Web.Blazor\FinaTech.Web.Blazor.csproj", "{9C363B1F-1E5C-487C-B406-324D11BCF570}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,276 @@
+@page "/payment"
+@using FinaTech.Application.Services.Dto
+@using FinaTech.Web.Blazor.Model
+@using FinaTech.Web.Blazor.Model.Filter
+@using FinaTech.Web.Blazor.Services
+@inject ApiService ApiService;
+
+<h3>Payment</h3>
+
+<EditForm Model="PaymentModel"
+          FormName="CreatePaymentForm"
+          OnValidSubmit="@HandleValidSubmit">
+    <FluentValidationValidator />
+    <ValidationSummary />
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Payments List</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Originator</th>
+                            <th>Beneficiary</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Charges Bearer</th>
+                            <th>Details</th>
+                            <th>Reference Number</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var payment in Payments)
+                        {
+                            <tr>
+                                <td>@payment.Id</td>
+                                <td>@payment.Originator</td>
+                                <td>@payment.Beneficiary</td>
+                                <td>@payment.Amount</td>
+                                <td>@payment.Date.ToString("g")</td>
+                                <td>@payment.ChargesBearer</td>
+                                <td>@payment.Details</td>
+                                <td>@payment.ReferenceNumber</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Originator</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorName" class="form-label">Name</label>
+                            <InputText id="originatorName" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Name"></InputText>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Name"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorAccountNumber" class="form-label">Account Number</label>
+                            <InputText id="originatorAccountNumber" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.AccountNumber"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.AccountNumber"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorBic" class="form-label">Bank Code</label>
+                            <InputText id="originatorBic" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Bic"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Bic"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorIban" class="form-label">IBAN</label>
+                            <InputText id="originatorIban" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Iban"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Iban"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorAddressLine1" class="form-label">Address Line 1</label>
+                            <InputText id="originatorAddressLine1" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Address.AddressLine1"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Address.AddressLine1"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorAddressLine2" class="form-label">Address Line 2</label>
+                            <InputText id="originatorAddressLine2" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Address.AddressLine2"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorAddressLine3" class="form-label">Address Line 3</label>
+                            <InputText id="originatorAddressLine3" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Address.AddressLine3"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorCity" class="form-label">City</label>
+                            <InputText id="originatorCity" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Address.City"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Address.City"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorPostCode" class="form-label">Post Code</label>
+                            <InputText id="originatorPostCode" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Address.PostCode"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Address.PostCode"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="originatorCountryCode" class="form-label">Country Code</label>
+                            <InputText id="originatorCountryCode" class="form-control" @bind-Value="PaymentModel.OriginatorAccount.Address.CountryCode"/>
+                            <ValidationMessage For="() => PaymentModel.OriginatorAccount.Address.CountryCode"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Beneficiary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryName" class="form-label">Name</label>
+                            <InputText id="beneficiaryName" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Name"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Name"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryAccountNumber" class="form-label">Account Number</label>
+                            <InputText id="beneficiaryAccountNumber" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.AccountNumber"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.AccountNumber"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryBic" class="form-label">BIC</label>
+                            <InputText id="beneficiaryBic" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Bic"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Bic"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryIban" class="form-label">IBAN</label>
+                            <InputText id="beneficiaryIban" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Iban"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Iban"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryAddressLine1" class="form-label">Address Line 1</label>
+                            <InputText id="beneficiaryAddressLine1" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Address.AddressLine1"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Address.AddressLine1"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryAddressLine2" class="form-label">Address Line 2</label>
+                            <InputText id="beneficiaryAddressLine2" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Address.AddressLine2"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryAddressLine3" class="form-label">Address Line 3</label>
+                            <InputText id="beneficiaryAddressLine3" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Address.AddressLine3"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryCity" class="form-label">City</label>
+                            <InputText id="beneficiaryCity" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Address.City"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Address.City"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryPostCode" class="form-label">Post Code</label>
+                            <InputText id="beneficiaryPostCode" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Address.PostCode"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Address.PostCode"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="beneficiaryCountryCode" class="form-label">Country</label>
+                            <InputText id="beneficiaryCountryCode" class="form-control" @bind-Value="PaymentModel.BeneficiaryAccount.Address.CountryCode"/>
+                            <ValidationMessage For="() => PaymentModel.BeneficiaryAccount.Address.CountryCode"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="chargesBearer" class="form-label">Charges Bearer</label>
+                            <InputSelect id="chargesBearer" class="form-select" @bind-Value="PaymentModel.ChargesBearer">
+                                <option value="">Select Charges Bearer</option>
+                                <option value="Originator">Originator</option>
+                                <option value="Beneficiary">Beneficiary</option>
+                                <option value="Shared">Shared</option>
+                            </InputSelect>
+                            <ValidationMessage For="() => PaymentModel.ChargesBearer"/>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="referenceNumber" class="form-label">Reference Number</label>
+                            <InputText id="referenceNumber" class="form-control" @bind-Value="PaymentModel.ReferenceNumber"/>
+                            <ValidationMessage For="() => PaymentModel.ReferenceNumber"/>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="amountValue" class="form-label">Amount</label>
+                            <InputNumber id="amountValue" class="form-control" @bind-Value="PaymentModel.Amount.Value"/>
+                            <ValidationMessage For="() => PaymentModel.Amount.Value"/>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="amountCurrency" class="form-label">Currency</label>
+                            <InputSelect id="amountCurrency" class="form-select" @bind-Value="PaymentModel.Amount.Currency">
+                                <option value="">Select Currency</option>
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                            </InputSelect>
+                            <ValidationMessage For="() => PaymentModel.Amount.Currency"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Details</label>
+                            <InputTextArea class="form-control" rows="3" @bind-Value="PaymentModel.Details"></InputTextArea>
+                            <ValidationMessage For="() => PaymentModel.Details"/>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    private EditContext _editContext = null!;
+    private const string EndPoint = "/payments";
+
+    public IReadOnlyList<ListPaymentModel> Payments { get; set; }
+
+    [SupplyParameterFromForm]
+    public required PaymentModel PaymentModel { get; set; }
+
+    protected override async void OnInitialized()
+    {
+        PaymentModel ??= new PaymentModel();
+        Payments ??= new List<ListPaymentModel>();
+        _editContext = new EditContext(PaymentModel);
+        await LoadPayments();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var paymentValidation = _editContext.Validate();
+        if (paymentValidation)
+        {
+           var result = await ApiService.PostAsync<PaymentModel, PaymentModel>(EndPoint, PaymentModel);
+           ResetModel();
+        }
+
+        await Task.Delay(0);
+    }
+
+    private async Task LoadPayments()
+    {
+        var result = await ApiService.GetPaymentsAsync<PagedResult<ListPaymentModel>>("payments", new PaymentFilterModel(null, 1, 10), CancellationToken.None);
+        if (result.Status == "success" && result.Data != null)
+        {
+            Payments = result.Data.Items;
+        }
+
+        StateHasChanged();
+
+    }
+
+    private void ResetModel()
+    {
+        PaymentModel = new PaymentModel();
+    }
+}
