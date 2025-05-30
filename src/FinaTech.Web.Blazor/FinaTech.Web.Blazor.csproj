@@ -34,7 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\FinaTech.Application\FinaTech.Application.csproj" />
+      <ProjectReference Include="..\FinaTech.Application\FinaTech.Application.csproj" />
     </ItemGroup>
 
 </Project>
