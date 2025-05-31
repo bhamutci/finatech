@@ -34,14 +34,13 @@ public class PaymentErrorHandlingMiddleware
     {
         try
         {
-            // Pass the request to the next middleware in the pipeline (including your endpoint)
             await _next(context);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unhandled exception occurred during request processing.");
 
-            context.Response.ContentType = MediaTypeNames.Application.Json; // Or ProblemDetails MIME type
+            context.Response.ContentType = MediaTypeNames.Application.Json;
 
             switch (ex)
             {
@@ -65,7 +64,7 @@ public class PaymentErrorHandlingMiddleware
                     break;
 
                 case ArgumentException argEx:
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest; // Bad Request for invalid input
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     await context.Response.WriteAsJsonAsync(new {ProblemDetails = argEx.Message});
                     break;
 
