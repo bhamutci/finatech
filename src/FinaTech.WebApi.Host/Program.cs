@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
-builder.Services.AddApplication(builder.Configuration);
+builder.Services.AddPaymentApplication(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 
 string[] enabledCorsOrigins =

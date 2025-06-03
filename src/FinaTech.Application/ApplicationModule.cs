@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Mapper;
+using Configuration;
 using EntityFramework;
 using Services.Payment;
 using Services.Payment.Dto;
@@ -21,15 +22,17 @@ public static class ApplicationModule
     /// <param name="services">The collection of service descriptors.</param>
     /// <param name="configuration">The configuration object used to configure services.</param>
     /// <returns>The updated service collection.</returns>
-    public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPaymentApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddEntityFramework(configuration);
-        services.AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly);
+        services.AddApplicationConfig(configuration)
+            .AddEntityFramework(configuration)
+            .AddAutoMapper(typeof(DtoAutoMapperProfile).Assembly)
+            .AddScoped<IValidator<CreateAccount>, CreateAccountDtoValidator>()
+            .AddScoped<IValidator<CreatePayment>, CreatePaymentDtoValidator>()
+            .AddScoped<IValidator<CreateAddress>, AddressDtoValidator>()
+            .AddScoped<IValidator<Money>, MoneyDtoValidator>()
+            .AddScoped<IPaymentService, PaymentService>();
 
-        services.AddScoped<IValidator<CreateAccount>, CreateAccountDtoValidator>();
-        services.AddScoped<IValidator<CreatePayment>, CreatePaymentDtoValidator>();
-        services.AddScoped<IValidator<CreateAddress>, AddressDtoValidator>();
-        services.AddScoped<IValidator<Money>, MoneyDtoValidator>();
-        services.AddScoped<IPaymentService, PaymentService>();
+        return services;
     }
 }
