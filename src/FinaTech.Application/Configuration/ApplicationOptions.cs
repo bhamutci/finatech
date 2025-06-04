@@ -1,6 +1,8 @@
 namespace FinaTech.Application.Configuration;
 
-public record ApplicationOptions: IApplicationOptions
+public record ApplicationOptions
 {
+  public const string Name = "Application";
+
   public string CorsOrigins { get; set; }
 }

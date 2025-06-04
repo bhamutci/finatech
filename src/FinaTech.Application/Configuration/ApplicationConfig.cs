@@ -8,7 +8,7 @@ public static class ApplicationConfig
 {
     public static IServiceCollection AddApplicationConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ApplicationOptions>(options=> configuration.GetSection("Application").Bind(options));
+        services.Configure<ApplicationOptions>(options=> configuration.GetSection(ApplicationOptions.Name).Bind(options));
 
         return services;
     }
